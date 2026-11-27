@@ -41,6 +41,99 @@ const FurDefs = () => (
   </defs>
 );
 
+export function KottonBelly() {
+  return (
+    <g>
+      <FurDefs />
+      <g className={"vq-cat-tail"}>
+        <path
+          d="M47 40 C56 37 57 28 52 20"
+          fill="none"
+          stroke="url(#vq-fur)"
+          strokeWidth="6"
+          strokeLinecap="round"
+        />
+        <circle cx="52" cy="18.6" r="3" fill="#C96F2B" />
+      </g>
+      <g className="vq-cat-body">
+        <ellipse cx="32" cy="41" rx="16.5" ry="9.5" fill="url(#vq-fur)" />
+        <ellipse cx="33" cy="42" rx="11" ry="6.6" fill="#FFF4E8" />
+        <ellipse cx="21" cy="48.6" rx="4.4" ry="2.4" fill="#FFF4E8" />
+        <ellipse cx="43" cy="48.6" rx="4.4" ry="2.4" fill="#FFF4E8" />
+        <g fill="#F6B39B" opacity="0.6">
+          <circle cx="20.4" cy="48.4" r="0.8" />
+          <circle cx="43.6" cy="48.4" r="0.8" />
+        </g>
+        <g className="animate-vq-wobble" style={{ transformBox: "fill-box", transformOrigin: "50% 100%" }}>
+          <path
+            d="M26 34 Q25.4 28 26 23.5"
+            stroke="url(#vq-fur)"
+            strokeWidth="4.4"
+            fill="none"
+            strokeLinecap="round"
+          />
+          <circle cx="26.2" cy="22" r="2.5" fill="#FFF4E8" />
+        </g>
+        <g
+          className="animate-vq-wobble"
+          style={{ animationDelay: "-450ms", transformBox: "fill-box", transformOrigin: "50% 100%" }}
+        >
+          <path
+            d="M38 34 Q38.6 28 38 23.5"
+            stroke="url(#vq-fur)"
+            strokeWidth="4.4"
+            fill="none"
+            strokeLinecap="round"
+          />
+          <circle cx="37.8" cy="22" r="2.5" fill="#FFF4E8" />
+        </g>
+        <g className="vq-cat-ear-l">
+          <path
+            d="M6.5 27 L9 16 L17 22.5 Z"
+            fill="url(#vq-fur)"
+            stroke="url(#vq-fur)"
+            strokeWidth="1.5"
+            strokeLinejoin="round"
+          />
+          <path d="M9.6 24.5 L10.6 19.2 L14.8 22.4 Z" fill="#F6B39B" />
+        </g>
+        <g className="vq-cat-ear-r">
+          <path
+            d="M19 22.5 L27 16 L29.5 27 Z"
+            fill="url(#vq-fur)"
+            stroke="url(#vq-fur)"
+            strokeWidth="1.5"
+            strokeLinejoin="round"
+          />
+          <path d="M21.2 22.4 L25.4 19.2 L26.4 24.5 Z" fill="#F6B39B" />
+        </g>
+        <circle cx="18" cy="33" r="11.5" fill="url(#vq-fur-head)" />
+        <g stroke="#3E2C22" strokeWidth="1.8" strokeLinecap="round" fill="none">
+          <path d="M11 33.5 Q13.4 30.8 15.8 33.5" />
+          <path d="M20.2 33.5 Q22.6 30.8 25 33.5" />
+        </g>
+        <g fill="#F6B39B" opacity="0.55">
+          <circle cx="9.5" cy="36.5" r="1.8" />
+          <circle cx="26.5" cy="36.5" r="1.8" />
+        </g>
+        <ellipse cx="18" cy="39" rx="5" ry="3.4" fill="#FFF4E8" />
+        <path d="M16.8 36.8 H19.2 L18 38.2 Z" fill="#E0705A" stroke="#E0705A" strokeWidth="0.8" strokeLinejoin="round" />
+        <g stroke="#3E2C22" strokeWidth="0.9" strokeLinecap="round" fill="none" opacity="0.75">
+          <path d="M18 38.6 V39.4" />
+          <path d="M18 39.4 Q16.8 40.8 15.6 39.8" />
+          <path d="M18 39.4 Q19.2 40.8 20.4 39.8" />
+        </g>
+        <g stroke="#3E2C22" strokeWidth="0.8" strokeLinecap="round" opacity="0.45">
+          <path d="M8 37.5 L2.5 36.8" />
+          <path d="M8 39.6 L3 41" />
+          <path d="M28 37.5 L33.5 36.8" />
+          <path d="M28 39.6 L33 41" />
+        </g>
+      </g>
+    </g>
+  );
+}
+
 type KottonProps = {
   happy?: boolean;
   sleepy?: boolean;

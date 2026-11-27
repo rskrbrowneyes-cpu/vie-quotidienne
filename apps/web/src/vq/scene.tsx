@@ -116,6 +116,41 @@ const StarPath = ({ x, y, s, delay }: { x: number; y: number; s: number; delay?:
 
 const MOUSE_SPOTS = IDLE_SPOTS;
 
+const WindowBird = ({ night, windowsFx }: { night: boolean; windowsFx: boolean }) => {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (night || windowsFx) return;
+    const timers = new Set<number>();
+    const interval = window.setInterval(() => {
+      setVisible(true);
+      timers.add(window.setTimeout(() => setVisible(false), 3000));
+    }, 20000);
+    return () => {
+      window.clearInterval(interval);
+      timers.forEach((timer) => window.clearTimeout(timer));
+    };
+  }, [night, windowsFx]);
+
+  if (night || windowsFx) return null;
+
+  return (
+    <g
+      transform="translate(262 47.5)"
+      className={`transition-opacity duration-500 ${visible ? "opacity-100" : "opacity-0"}`}
+    >
+      <g className="animate-vq-bob" style={{ transformBox: "fill-box", transformOrigin: "50% 100%" }}>
+        <ellipse cx="0" cy="-3" rx="3.2" ry="2.2" fill="#5E96C4" />
+        <circle cx="2.8" cy="-4.6" r="1.8" fill="#3E5F7E" />
+        <path d="M4.4 -4.6 L6.2 -4 L4.4 -3.6 Z" fill="#E0705A" />
+        <circle cx="3.4" cy="-5" r="0.5" fill="#FFF4E8" />
+        <path d="M-0.6 -1 V0.6 M0.8 -1 V0.6" stroke="#3E5F7E" strokeWidth="0.6" strokeLinecap="round" />
+        <path d="M-2.4 -2.6 Q-3.6 -3.4 -4.2 -2.2" stroke="#3E5F7E" strokeWidth="1" fill="none" strokeLinecap="round" />
+      </g>
+    </g>
+  );
+};
+
 const ToyMouse = ({ flip }: { flip: boolean }) => (
   <g transform={flip ? "translate(-15 0) scale(-1 1)" : "translate(65 0)"} className="animate-vq-scurry">
     <path
@@ -145,6 +180,7 @@ type RoomProps = {
   windowsFx: boolean;
   camLeft: number;
   catX: number;
+  moving: boolean;
   children?: ReactNode;
   extraFloor?: ReactNode;
 };
@@ -162,6 +198,7 @@ export const RoomDiorama = ({
   windowsFx,
   camLeft,
   catX,
+  moving,
   children,
   extraFloor,
 }: RoomProps) => (
@@ -217,7 +254,8 @@ export const RoomDiorama = ({
 
     <g
       style={{
-        transform: `translateX(${(-camLeft * 0.9).toFixed(2)}px)`,
+        transform: `translateX(${(-camLeft * 0.9).toFixed(2)}px) scale(${moving ? 0.97 : 1})`,
+        transformOrigin: "80px 72px",
         transition: `transform ${WALK_MS}ms ease-in-out`,
       }}
     >
@@ -242,7 +280,8 @@ export const RoomDiorama = ({
 
     <g
       style={{
-        transform: `translateX(${-camLeft}px)`,
+        transform: `translateX(${-camLeft}px) scale(${moving ? 0.97 : 1})`,
+        transformOrigin: "80px 72px",
         transition: `transform ${WALK_MS}ms ease-in-out`,
       }}
     >
@@ -289,10 +328,22 @@ export const RoomDiorama = ({
           <circle cx="279" cy="26.4" r="2.4" />
           <rect x="268" y="25.4" width="13.6" height="3.4" rx="1.7" />
         </g>
+        <g
+          className="animate-vq-drift"
+          style={{ animationDuration: "9s", animationDelay: "2s" }}
+          fill="#FFF"
+          opacity="0.9"
+        >
+          <circle cx="276" cy="13" r="1.8" />
+          <circle cx="279.5" cy="11.8" r="2.3" />
+          <circle cx="283" cy="13.2" r="1.7" />
+          <rect x="275" y="12.4" width="9.6" height="2.4" rx="1.2" />
+        </g>
       </g>
       <rect x="267" y="8" width="2" height="38" fill={TRIM} opacity="0.8" />
       <rect x="248" y="25.5" width="42" height="2" fill={TRIM} opacity="0.8" />
       <rect x="242" y="48" width="54" height="4" rx="2" fill="#D9B98C" />
+      <WindowBird night={night} windowsFx={windowsFx} />
 
       <ellipse cx="10" cy="40" rx="8" ry="13" fill="#B0C2A0" />
       <ellipse cx="10" cy="40" rx="6.6" ry="11.6" fill="#C8DCE8" />
@@ -336,7 +387,7 @@ export const RoomDiorama = ({
       <rect x="89" y="66" width="5" height="22" rx="2" fill="#8D98A5" />
       <circle cx="91.5" cy="69" r="1.1" fill="#7FB5B0" className="animate-vq-shine" />
       {vacuumFx ? null : (
-        <g>
+        <g className="animate-vq-bob" style={{ transformBox: "fill-box", transformOrigin: "50% 100%" }}>
           <rect x="76" y="84" width="16" height="6" rx="3" fill="#3E2C22" />
           <rect x="77.5" y="81" width="13" height="4.4" rx="2.2" fill="url(#vq-robot)" />
           <rect x="79" y="82" width="10" height="1.4" rx="0.7" fill="#FFE9D6" opacity="0.85" />
@@ -359,8 +410,17 @@ export const RoomDiorama = ({
 
       {laundryFx ? (
         <>
-          <rect x="153" y="60" width="8" height="9" rx="3" fill="#FF8A66" className="animate-vq-tumble" />
-          <rect x="163" y="56" width="7" height="8" rx="3" fill="#7FB5D6" className="animate-vq-tumble" style={{ animationDelay: "400ms" }} />
+          <rect x="155" y="58" width="8" height="9" rx="3" fill="#FF8A66" className="animate-vq-lift" />
+          <rect
+            x="170"
+            y="70"
+            width="9"
+            height="3.4"
+            rx="1.6"
+            fill="#7FB5D6"
+            className="animate-vq-bloom"
+            style={{ animationDelay: "600ms" }}
+          />
           <path
             d="M168 62 H172 V67 L175 69.6 A2.6 2.6 0 1 1 171.4 73 L168 70 Z"
             fill="#E86A8A"
@@ -408,32 +468,43 @@ export const RoomDiorama = ({
       ) : null}
 
       <g className="animate-vq-sway" style={{ transformBox: "fill-box", transformOrigin: "50% 100%" }}>
-        <ellipse cx="310.6" cy="66" rx="3" ry="10" fill="#6FA85A" transform="rotate(-20 310.6 66)" />
-        <ellipse cx="318.4" cy="64" rx="3" ry="11" fill="#8BC34A" transform="rotate(18 318.4 64)" />
-        <ellipse cx="314.5" cy="62" rx="3.2" ry="12" fill="#6FA85A" />
+        <ellipse cx="318.6" cy="66" rx="3" ry="10" fill="#6FA85A" transform="rotate(-20 318.6 66)" />
+        <ellipse cx="326.4" cy="64" rx="3" ry="11" fill="#8BC34A" transform="rotate(18 326.4 64)" />
+        <ellipse cx="322.5" cy="62" rx="3.2" ry="12" fill="#6FA85A" />
       </g>
-      <path d="M308 76 L322 76 L320.2 92 L309.8 92 Z" fill="#C96F2B" />
-      <rect x="307" y="73.6" width="16" height="3.4" rx="1.7" fill="#E09A55" />
+      <path d="M316 76 L330 76 L328.2 92 L317.8 92 Z" fill="#C96F2B" />
+      <rect x="315" y="73.6" width="16" height="3.4" rx="1.7" fill="#E09A55" />
       {gardenFx ? (
         <>
           <path
-            d="M315 66 C316.4 68.6 319 70 322 70.6 C319 71.2 316.4 72.6 315 75.2 C313.6 72.6 311 71.2 308 70.6 C311 70 313.6 68.6 315 66 Z"
+            d="M323 66 C324.4 68.6 327 70 330 70.6 C327 71.2 324.4 72.6 323 75.2 C321.6 72.6 319 71.2 316 70.6 C319 70 321.6 68.6 323 66 Z"
             fill="#E86A8A"
             className="animate-vq-bloom"
           />
         </>
       ) : null}
 
-      <path d="M336 78 L346 78 L344.8 92 L337.2 92 Z" fill="#9AA5B1" />
-      <rect x="338.4" y="82" width="2.2" height="8" rx="1.1" fill="#B4BEC8" opacity="0.85" />
-      <path d="M341 82 V88.6" stroke="#7C8794" strokeWidth="1.2" strokeLinecap="round" />
+      <rect x="294" y="10" width="18" height="78" rx="2" fill={TRIM} />
+      <rect x="296.5" y="12.5" width="13" height="73" rx="1" fill="#A5D8EC" />
+      <rect x="296.5" y="62" width="13" height="23.5" rx="1" fill="#9BC77E" />
+      <g stroke="#6FA85A" strokeWidth="0.8" strokeLinecap="round" fill="none">
+        <path d="M299 85.5 V79.5" />
+        <path d="M302.4 85.5 V78.6" />
+        <path d="M305.8 85.5 V80" />
+      </g>
+      <rect x="295.5" y="46" width="14" height="1.6" fill={TRIM} opacity="0.8" />
+      <rect x="305.6" y="50" width="1.8" height="6" rx="0.9" fill="#8FA6AD" />
+
+      <path d="M341 78 L351 78 L349.8 92 L342.2 92 Z" fill="#9AA5B1" />
+      <rect x="343.4" y="82" width="2.2" height="8" rx="1.1" fill="#B4BEC8" opacity="0.85" />
+      <path d="M346 82 V88.6" stroke="#7C8794" strokeWidth="1.2" strokeLinecap="round" />
       <g className={trashFx ? "animate-vq-lid" : undefined}>
-        <rect x="334" y="74.4" width="14" height="3.4" rx="1.7" fill="#9AA5B1" />
-        <rect x="337.5" y="72.6" width="7" height="2.2" rx="1.1" fill="#8D8071" />
+        <rect x="339" y="74.4" width="14" height="3.4" rx="1.7" fill="#9AA5B1" />
+        <rect x="342.5" y="72.6" width="7" height="2.2" rx="1.1" fill="#8D8071" />
       </g>
       {trashFx ? (
         <path
-          d="M338.5 60 Q341 58.6 343.5 60 L344 62 Q346.4 62.6 346.4 65.6 L346.4 68.6 L335.6 68.6 L335.6 65.6 Q335.6 62.6 338 62 Z"
+          d="M343.5 60 Q346 58.6 348.5 60 L349 62 Q351.4 62.6 351.4 65.6 L351.4 68.6 L340.6 68.6 L340.6 65.6 Q340.6 62.6 343 62 Z"
           fill="#D9D2C4"
           className="animate-vq-drop-in"
           style={{ transformBox: "fill-box", transformOrigin: "center" }}
@@ -441,16 +512,21 @@ export const RoomDiorama = ({
       ) : null}
 
       {windowsFx ? (
-        <rect
-          x="250"
-          y="14"
-          width="18"
-          height="28"
-          fill="#FFFFFF"
-          opacity="0.5"
-          className="animate-vq-squeegee"
-          style={{ transformBox: "fill-box", transformOrigin: "center", transform: "skewX(-8deg)" }}
-        />
+        <>
+          <rect
+            x="250"
+            y="14"
+            width="18"
+            height="28"
+            fill="#FFFFFF"
+            opacity="0.5"
+            className="animate-vq-squeegee"
+            style={{ transformBox: "fill-box", transformOrigin: "center", transform: "skewX(-8deg)" }}
+          />
+          <g className="animate-vq-glint">
+            <StarPath x={252} y={22} s={2.2} />
+          </g>
+        </>
       ) : null}
 
       {complete ? (
@@ -520,6 +596,7 @@ export function CatScene({
   const [moving, setMoving] = useState(false);
   const [walkDir, setWalkDir] = useState<"left" | "right">("right");
   const [mouse, setMouse] = useState(false);
+  const [spin, setSpin] = useState(false);
   const lastKey = useRef(activityKey);
   const xRef = useRef(TARGET_X[activity]);
   const walkTimer = useRef<number | undefined>(undefined);
@@ -538,6 +615,18 @@ export function CatScene({
       setMoving(false);
     }, WALK_MS);
   };
+
+  useEffect(() => {
+    if (!celebrating) return;
+    walkTo(160);
+    const start = window.setTimeout(() => setSpin(true), 950);
+    const stop = window.setTimeout(() => setSpin(false), 1750);
+    return () => {
+      window.clearTimeout(start);
+      window.clearTimeout(stop);
+      setSpin(false);
+    };
+  }, [celebrating]);
 
   useEffect(() => {
     if (lastKey.current === activityKey) return;
@@ -572,7 +661,9 @@ export function CatScene({
 
   const catPose = moving
     ? "animate-vq-walk"
-    : mouse
+    : spin
+      ? "animate-vq-spin"
+      : mouse
       ? "animate-vq-pounce"
       : !active
         ? undefined
@@ -624,12 +715,13 @@ export function CatScene({
         windowsFx={activity === "windows" && acting}
         camLeft={camLeft}
         catX={catX}
+        moving={moving && !celebrating}
       >
         <g transform="translate(0 42)">
           <g key={facing} className="animate-vq-turn">
             <g className={catPose}>
               <Kotton
-                happy={complete || celebrating}
+                happy={complete || celebrating || spin}
                 excited={acting || celebrating || mouse}
                 action={catAction}
                 facing={facing}
