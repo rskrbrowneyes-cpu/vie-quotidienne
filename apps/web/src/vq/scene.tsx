@@ -82,7 +82,6 @@ const FLOOR_SPARKLES = [
 const WOOD = "#B98A56";
 const WOOD_DARK = "#9A6B3F";
 const WOOD_LIGHT = "#A87947";
-const WALL = "#EAD8B4";
 const TRIM = "#8B5E34";
 
 const PixelStar = ({ color, className = "", style }: { color: string; className?: string; style?: CSSProperties }) => (
@@ -183,13 +182,34 @@ const PixelRoom = ({
     viewBox="0 0 160 120"
     preserveAspectRatio="xMidYMax slice"
     shapeRendering="crispEdges"
-    className="absolute inset-0 h-full w-full"
+    className="animate-vq-parallax absolute inset-0 h-full w-full"
     aria-hidden
   >
-    <rect x="0" y="0" width="160" height="92" fill={WALL} />
-    <rect x="0" y="0" width="160" height="8" fill="#F2E4C6" />
+    <defs>
+      <linearGradient id="vq-wall" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#F4E6C8" />
+        <stop offset="1" stopColor="#E0CBA2" />
+      </linearGradient>
+      <linearGradient id="vq-floor" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#A5764A" />
+        <stop offset="0.5" stopColor={WOOD} />
+        <stop offset="1" stopColor="#C79A67" />
+      </linearGradient>
+      <linearGradient id="vq-ao" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#3E2C22" stopOpacity="0.4" />
+        <stop offset="1" stopColor="#3E2C22" stopOpacity="0" />
+      </linearGradient>
+      <linearGradient id="vq-shaft" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#FFF6DC" stopOpacity="0.5" />
+        <stop offset="1" stopColor="#FFF6DC" stopOpacity="0" />
+      </linearGradient>
+      <filter id="vq-soft" x="-40%" y="-40%" width="180%" height="180%">
+        <feGaussianBlur stdDeviation="1.4" />
+      </filter>
+    </defs>
+    <rect x="0" y="0" width="160" height="92" fill="url(#vq-wall)" />
     <rect x="0" y="88" width="160" height="4" fill="#D9B98C" />
-    <rect x="0" y="92" width="160" height="28" fill={WOOD} />
+    <rect x="0" y="92" width="160" height="28" fill="url(#vq-floor)" />
     {[99, 106, 113, 120, 127, 134, 141, 148].map((y) => (
       <rect key={y} x="0" y={y} width="160" height="1" fill={WOOD_DARK} opacity="0.6" />
     ))}
@@ -237,6 +257,13 @@ const PixelRoom = ({
     <rect x="124" y="11" width="2" height="34" fill={TRIM} />
     <rect x="107" y="26" width="36" height="2" fill={TRIM} />
     <rect x="102" y="48" width="46" height="3" fill={WOOD_LIGHT} />
+    <rect x="102" y="51" width="46" height="2" fill="#3E2C22" opacity="0.18" />
+
+    {!night ? (
+      <polygon points="108,51 146,51 118,120 62,120" fill="url(#vq-shaft)" />
+    ) : null}
+
+    <rect x="0" y="92" width="160" height="7" fill="url(#vq-ao)" />
 
     <rect x="12" y="14" width="18" height="14" fill={TRIM} />
     <rect x="14" y="16" width="14" height="10" fill="#FFE9D6" />
@@ -254,6 +281,7 @@ const PixelRoom = ({
     <rect x="14" y="36" width="3" height="4" fill="#9AA5B1" />
     <rect x="10" y="42" width="26" height="2" fill="#F0EBE0" />
     <rect x="11" y="44" width="24" height="7" fill="#FFF" />
+    <rect x="11" y="49" width="24" height="2" fill="#D9D2C4" />
     <rect x="13" y="45" width="20" height="4" fill="#E8E4DC" />
     <rect x="12" y="51" width="22" height="2" fill="#C9A876" />
     <rect x="14" y="53" width="3" height="4" fill="#C9A876" />
@@ -271,6 +299,7 @@ const PixelRoom = ({
       </g>
     ) : null}
 
+    <ellipse cx="52" cy="91" rx="10" ry="2.4" fill="#3E2C22" opacity="0.22" filter="url(#vq-soft)" />
     <rect x="44" y="38" width="4" height="2" fill={TRIM} />
     <rect x="45" y="40" width="2" height="6" fill="#C96F2B" />
     <rect x="47" y="46" width="2" height="8" fill="#C96F2B" />
@@ -282,6 +311,7 @@ const PixelRoom = ({
     <rect x="47" y="86" width="10" height="1" fill="#C96F2B" />
     <rect x="47" y="90" width="10" height="2" fill="#E8C29A" />
 
+    <ellipse cx="68" cy="91" rx="12" ry="2.4" fill="#3E2C22" opacity="0.22" filter="url(#vq-soft)" />
     <rect x="58" y="82" width="20" height="8" fill={TRIM} />
     <rect x="60" y="84" width="16" height="2" fill="#6E4526" />
     <rect x="60" y="76" width="16" height="2" fill="#FF8A33" />
@@ -289,8 +319,12 @@ const PixelRoom = ({
     <rect x="62" y="79" width="12" height="2" fill="#FFE9D6" />
     <rect x="67" y="79" width="2" height="2" fill="#3E2C22" />
 
+    <ellipse cx="141" cy="91" rx="9" ry="2.2" fill="#3E2C22" opacity="0.22" filter="url(#vq-soft)" />
     <rect x="132" y="76" width="16" height="3" fill="#E08A3C" />
+    <rect x="132" y="76" width="16" height="1" fill="#F5B271" />
     <rect x="134" y="79" width="12" height="11" fill="#C96F2B" />
+    <rect x="134" y="79" width="2" height="11" fill="#B05E20" />
+    <rect x="144" y="79" width="2" height="11" fill="#E08A3C" />
     <rect x="134" y="83" width="12" height="1" fill="#B05E20" />
     <g className="animate-vq-sway">
       <rect x="136" y="62" width="4" height="7" fill="#6FA85A" />
@@ -300,9 +334,11 @@ const PixelRoom = ({
       <rect x="147" y="66" width="3" height="5" fill="#6FA85A" />
     </g>
 
+    <ellipse cx="120" cy="90" rx="13" ry="2.4" fill="#3E2C22" opacity="0.22" filter="url(#vq-soft)" />
     <rect x="108" y="82" width="24" height="3" fill="#C9A876" />
     <rect x="110" y="85" width="20" height="4" fill="#B08A5A" />
     <rect x="111" y="83" width="18" height="3" fill="#FFE9D6" />
+    <rect x="111" y="85" width="18" height="1" fill="#E8D4B8" />
 
     <rect x="66" y="98" width="48" height="16" fill="#FFE9D6" />
     <rect x="66" y="98" width="48" height="2" fill="#FFD9A8" />
@@ -393,8 +429,23 @@ export function CatScene({
           ))
         : null}
 
+      <div
+        className={`pointer-events-none absolute inset-0 transition-opacity duration-1000 ${
+          night ? "bg-[#1A2340]/25 opacity-100" : "opacity-0"
+        }`}
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_58%,rgba(62,44,34,0.22))]"
+        aria-hidden
+      />
+
       <div className="absolute bottom-[13%] left-[6%] flex items-end gap-1">
-        <div key={`in-${activityKey}`} className="animate-vq-entrance">
+        <div
+          className="absolute bottom-[-4px] left-7 h-3 w-24 rounded-[50%] bg-[#3E2C22]/25 blur-[3px]"
+          aria-hidden
+        />
+        <div key={`in-${activityKey}`} className="animate-vq-entrance relative">
           <div
             key={`hop-${hopKey}`}
             className={hopKey > 0 ? "animate-vq-hop" : undefined}

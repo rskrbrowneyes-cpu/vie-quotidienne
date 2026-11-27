@@ -28,7 +28,10 @@ export function PixelCat({
       </g>
       <g className="vq-cat-body">
         <rect x="8" y="12" width="14" height="10" fill="#F0954F" />
+        <rect x="8" y="20" width="14" height="2" fill="#E08A3C" />
+        <rect x="8" y="12" width="14" height="1" fill="#FFB877" opacity="0.7" />
         <rect x="11" y="14" width="6" height="7" fill="#FFF4E8" />
+        <rect x="11" y="19" width="6" height="2" fill="#F0E0CC" />
         <rect x="8" y="14" width="1" height="3" fill="#C96F2B" />
         <rect x="21" y="16" width="1" height="3" fill="#C96F2B" />
         <rect x="9" y="21" width="3" height="2" fill="#FFF4E8" />
@@ -42,6 +45,10 @@ export function PixelCat({
           <rect x="19" y="3" width="1" height="1" fill="#F6B39B" />
         </g>
         <rect x="6" y="5" width="16" height="9" fill="#F0954F" />
+        <rect x="6" y="5" width="16" height="1" fill="#FFB877" opacity="0.7" />
+        <rect x="6" y="12" width="16" height="2" fill="#E08A3C" />
+        <rect x="6" y="5" width="1" height="9" fill="#E08A3C" opacity="0.55" />
+        <rect x="21" y="5" width="1" height="9" fill="#FFB877" opacity="0.55" />
         <rect x="11" y="5" width="1" height="2" fill="#C96F2B" />
         <rect x="14" y="5" width="1" height="2" fill="#C96F2B" />
         <rect x="17" y="5" width="1" height="2" fill="#C96F2B" />

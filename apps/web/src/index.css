@@ -281,6 +281,16 @@
   }
 }
 
+@keyframes vq-parallax {
+  0%,
+  100% {
+    transform: translate(-2px, 1px) scale(1.01);
+  }
+  50% {
+    transform: translate(2px, -1px) scale(1.01);
+  }
+}
+
 @keyframes vq-twinkle {
   0%,
   100% {
@@ -567,6 +577,11 @@
   animation: vq-wobble 900ms ease-in-out infinite;
 }
 
+.animate-vq-parallax {
+  animation: vq-parallax 14s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
 .animate-vq-celebrate {
   animation: vq-celebrate 1.7s ease-in forwards;
 }
@@ -624,7 +639,8 @@
   .animate-vq-shoot,
   .animate-vq-drift,
   .animate-vq-wobble,
-  .animate-vq-twinkle {
+  .animate-vq-twinkle,
+  .animate-vq-parallax {
     animation: none;
   }
 }
