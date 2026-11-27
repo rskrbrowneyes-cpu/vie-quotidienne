@@ -1,6 +1,6 @@
-type CatFacing = "left" | "right" | "front" | "back";
+export type CatFacing = "left" | "right" | "front" | "back";
 
-type CatAction =
+export type CatAction =
   | "none"
   | "sweep"
   | "vacuum"
@@ -13,16 +13,7 @@ type CatAction =
   | "garden"
   | "tidy";
 
-type CatProps = {
-  happy?: boolean;
-  sleepy?: boolean;
-  excited?: boolean;
-  action?: CatAction;
-  facing?: CatFacing;
-  className?: string;
-};
-
-const ARM_CLASSES: Record<CatAction, string> = {
+export const ARM_CLASSES: Record<CatAction, string> = {
   none: "",
   sweep: "vq-arm-sweep",
   vacuum: "vq-arm-rest",
@@ -50,25 +41,26 @@ const FurDefs = () => (
   </defs>
 );
 
-export function KottonCat({
+type KottonProps = {
+  happy?: boolean;
+  sleepy?: boolean;
+  excited?: boolean;
+  action?: CatAction;
+  facing?: CatFacing;
+};
+
+export function Kotton({
   happy = false,
   sleepy = false,
   excited = false,
   action = "none",
   facing = "front",
-  className = "",
-}: CatProps) {
+}: KottonProps) {
   const armClass = ARM_CLASSES[action];
-  const svgProps = {
-    viewBox: "0 0 64 52",
-    role: "img",
-    "aria-label": "Kotton, le chat roux mascotte",
-    className,
-  };
 
   if (facing === "back") {
     return (
-      <svg {...svgProps}>
+      <g>
         <FurDefs />
         <g className={happy ? undefined : `vq-cat-tail${excited ? " vq-cat-tail-fast" : ""}`}>
           <path
@@ -99,10 +91,7 @@ export function KottonCat({
             </g>
           ) : null}
           {armClass ? (
-            <g
-              className={`vq-cat-arm-br ${armClass}`}
-              style={{ animationDelay: "-250ms" }}
-            >
+            <g className={`vq-cat-arm-br ${armClass}`} style={{ animationDelay: "-250ms" }}>
               <path
                 d="M38 34 V42.5"
                 stroke="url(#vq-fur)"
@@ -140,13 +129,13 @@ export function KottonCat({
             <path d="M37 9 V12" />
           </g>
         </g>
-      </svg>
+      </g>
     );
   }
 
   if (facing === "front") {
     return (
-      <svg {...svgProps}>
+      <g>
         <FurDefs />
         <g className={happy ? undefined : `vq-cat-tail${excited ? " vq-cat-tail-fast" : ""}`}>
           <path
@@ -174,10 +163,7 @@ export function KottonCat({
             </g>
           ) : null}
           {armClass ? (
-            <g
-              className={`vq-cat-arm-fr ${armClass}`}
-              style={{ animationDelay: "-250ms" }}
-            >
+            <g className={`vq-cat-arm-fr ${armClass}`} style={{ animationDelay: "-250ms" }}>
               <path
                 d="M36 33 Q36.8 38 37.5 42.5"
                 stroke="url(#vq-fur)"
@@ -260,12 +246,12 @@ export function KottonCat({
             <path d="M46 26 L52.5 27.5" />
           </g>
         </g>
-      </svg>
+      </g>
     );
   }
 
   return (
-    <svg {...svgProps}>
+    <g>
       <FurDefs />
       <g transform={facing === "right" ? "translate(64 0) scale(-1 1)" : undefined}>
         <g className={happy ? undefined : `vq-cat-tail${excited ? " vq-cat-tail-fast" : ""}`}>
@@ -281,10 +267,7 @@ export function KottonCat({
         </g>
         <g className="vq-cat-body">
           {armClass ? (
-            <g
-              className={`vq-cat-arm-far ${armClass}`}
-              style={{ animationDelay: "-250ms" }}
-            >
+            <g className={`vq-cat-arm-far ${armClass}`} style={{ animationDelay: "-250ms" }}>
               <path
                 d="M34 31 Q29 36 24 43"
                 stroke="#E08A3C"
@@ -386,6 +369,6 @@ export function KottonCat({
           </g>
         </g>
       </g>
-    </svg>
+    </g>
   );
 }
