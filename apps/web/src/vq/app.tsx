@@ -11,15 +11,17 @@ import { BudgetModule } from "./budget";
 import { ChoresModule } from "./chores";
 import { HabitsModule } from "./habits";
 import { InstallButton } from "./install";
+import { KottonModule } from "./kotton";
 import { SettingsPanel } from "./settings";
 import { TasksModule } from "./tasks";
 
-type TabId = "tasks" | "habits" | "chores" | "budget";
+type TabId = "tasks" | "habits" | "chores" | "kotton" | "budget";
 
 const TABS: { id: TabId; label: string; icon: string }[] = [
   { id: "tasks", label: "Tâches", icon: "✓" },
   { id: "habits", label: "Habitudes", icon: "◎" },
   { id: "chores", label: "Maison", icon: "⌂" },
+  { id: "kotton", label: "Kotton", icon: "🐾" },
   { id: "budget", label: "Budget", icon: "€" },
 ];
 
@@ -148,13 +150,15 @@ export const App = () => {
           <HabitsModule />
         ) : tab === "chores" ? (
           <ChoresModule />
+        ) : tab === "kotton" ? (
+          <KottonModule />
         ) : (
           <BudgetModule />
         )}
       </main>
 
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-canvas/95 backdrop-blur">
-        <div className="mx-auto grid w-full max-w-md grid-cols-4 pb-[env(safe-area-inset-bottom)]">
+        <div className="mx-auto grid w-full max-w-md grid-cols-5 pb-[env(safe-area-inset-bottom)]">
           {TABS.map((entry) => (
             <button
               key={entry.id}

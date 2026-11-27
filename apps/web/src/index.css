@@ -819,6 +819,46 @@
   transform-origin: 50% 100%;
 }
 
+@keyframes vq-pounce {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+  25% {
+    transform: translateY(-1px) scaleY(0.92);
+  }
+  45% {
+    transform: translateY(-9px) scaleY(1.08);
+  }
+  65% {
+    transform: translateY(0) scaleY(0.84);
+  }
+  82% {
+    transform: translateY(-2px) scaleY(0.96);
+  }
+}
+
+.animate-vq-pounce {
+  animation: vq-pounce 1.1s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+
+@keyframes vq-scurry {
+  0% {
+    transform: translateX(var(--vq-sx, 0px)) translateY(0);
+  }
+  100% {
+    transform: translateX(calc(var(--vq-sx, 0px) + 6px)) translateY(-1px);
+  }
+}
+
+.animate-vq-scurry {
+  animation: vq-scurry 260ms ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
 .vq-cat-arm {
   transform-box: fill-box;
   transform-origin: 85% 15%;
@@ -1224,7 +1264,9 @@
   .animate-vq-tool-sweep,
   .animate-vq-tool-dust,
   .animate-vq-walk,
-  .animate-vq-patrol-x {
+  .animate-vq-patrol-x,
+  .animate-vq-pounce,
+  .animate-vq-scurry {
     animation: none;
   }
 }
