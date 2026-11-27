@@ -2,7 +2,7 @@ import { useRouteContext } from "@tanstack/react-router";
 import { createIsomorphicFn } from "@tanstack/react-start";
 
 /** Shown when nothing names the app (a bare shell, or a test run). */
-export const DEFAULT_APP_NAME = "App";
+export const DEFAULT_APP_NAME = "Vie quotidienne";
 
 /**
  * The name the bundle was built with: `vite.config.ts` defines it from `APP_NAME` in the app's
