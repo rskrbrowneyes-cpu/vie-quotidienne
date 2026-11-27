@@ -155,7 +155,6 @@ export const ChoresModule = () => {
   const particleCounter = useRef(0);
   const [activity, setActivity] = useState<Activity>("idle");
   const [activityKey, setActivityKey] = useState(0);
-  const [hopKey, setHopKey] = useState(0);
   const [celebrating, setCelebrating] = useState(false);
   const activityTimer = useRef<number | null>(null);
 
@@ -286,7 +285,6 @@ export const ChoresModule = () => {
       pushToast(`+${gained} XP`);
       if (nextLevel > level) {
         pushToast(`🎉 Niveau ${nextLevel} atteint !`);
-        setHopKey((previous) => previous + 1);
       }
     }
   };
@@ -321,7 +319,6 @@ export const ChoresModule = () => {
           celebrating={celebrating}
           activity={activity}
           activityKey={activityKey}
-          hopKey={hopKey}
           particles={particles}
         />
         <div className="rounded-b-2xl border-2 border-t-0 border-accent bg-surface/95 px-4 py-3 backdrop-blur">

@@ -679,6 +679,103 @@
   animation: vq-lean 620ms ease-in-out infinite;
 }
 
+@keyframes vq-crouch {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+  50% {
+    transform: translateY(3px) scaleY(0.93);
+  }
+}
+
+@keyframes vq-reach {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+  50% {
+    transform: translateY(-3px) scaleY(1.04);
+  }
+}
+
+@keyframes vq-carry {
+  0%,
+  100% {
+    transform: rotate(-2.5deg) translateY(0);
+  }
+  50% {
+    transform: rotate(2.5deg) translateY(-1.5px);
+  }
+}
+
+@keyframes vq-push {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes vq-scrub-paw {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(3px, 2px) rotate(-10deg);
+  }
+  50% {
+    transform: translate(0, 3px) rotate(0deg);
+  }
+  75% {
+    transform: translate(-3px, 2px) rotate(10deg);
+  }
+}
+
+@keyframes vq-wipe {
+  0%,
+  100% {
+    transform: translateX(-4px) rotate(-8deg);
+  }
+  50% {
+    transform: translateX(4px) rotate(8deg);
+  }
+}
+
+.animate-vq-crouch {
+  animation: vq-crouch 1.6s ease-in-out infinite;
+  transform-origin: 50% 100%;
+}
+
+.animate-vq-reach {
+  animation: vq-reach 1.6s ease-in-out infinite;
+  transform-origin: 50% 100%;
+}
+
+.animate-vq-carry {
+  animation: vq-carry 1.1s ease-in-out infinite;
+  transform-origin: 50% 90%;
+}
+
+.animate-vq-push {
+  animation: vq-push 1.1s ease-in-out infinite;
+}
+
+.animate-vq-scrub-paw {
+  animation: vq-scrub-paw 600ms ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.animate-vq-wipe {
+  animation: vq-wipe 700ms ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
 .vq-cat-tail-fast {
   animation-duration: 0.55s;
 }
@@ -884,7 +981,13 @@
   .animate-vq-drop-in,
   .animate-vq-fly,
   .animate-vq-flap,
-  .animate-vq-hops {
+  .animate-vq-hops,
+  .animate-vq-crouch,
+  .animate-vq-reach,
+  .animate-vq-carry,
+  .animate-vq-push,
+  .animate-vq-scrub-paw,
+  .animate-vq-wipe {
     animation: none;
   }
 }
