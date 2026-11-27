@@ -146,6 +146,7 @@ type RoomProps = {
   camLeft: number;
   catX: number;
   children?: ReactNode;
+  extraFloor?: ReactNode;
 };
 
 export const RoomDiorama = ({
@@ -162,6 +163,7 @@ export const RoomDiorama = ({
   camLeft,
   catX,
   children,
+  extraFloor,
 }: RoomProps) => (
   <svg
     viewBox="0 0 160 120"
@@ -488,6 +490,7 @@ export const RoomDiorama = ({
         <ellipse cx="32" cy="94" rx="15" ry="2.8" fill="#3E2C22" opacity="0.22" filter="url(#vq-soft)" />
         {children}
       </g>
+      {extraFloor}
     </g>
   </svg>
 );
