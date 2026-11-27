@@ -122,6 +122,7 @@ const PixelVacuum = () => (
     <rect x="2" y="1" width="22" height="4" fill="#FF7000" />
     <rect x="4" y="2" width="18" height="2" fill="#FFE9D6" />
     <rect x="12" y="2" width="2" height="2" fill="#3E2C22" />
+    <rect x="20" y="2" width="2" height="2" fill="#E0705A" className="animate-vq-shine" />
     <rect x="0" y="5" width="2" height="2" fill="#3E2C22" />
     <rect x="24" y="5" width="2" height="2" fill="#3E2C22" />
   </svg>
@@ -129,8 +130,8 @@ const PixelVacuum = () => (
 
 const PixelLitterBox = () => (
   <svg viewBox="0 0 40 20" shapeRendering="crispEdges" className="h-14 w-28">
-    <rect x="2" y="6" width="36" height="12" fill="#FF7000" />
-    <rect x="4" y="8" width="32" height="10" fill="#FFE9D6" />
+    <rect x="2" y="6" width="36" height="12" fill="#7C8794" />
+    <rect x="4" y="8" width="32" height="10" fill="#F5F2EA" />
     <rect x="6" y="9" width="28" height="3" fill="#D9B98C" />
     <rect x="10" y="9" width="4" height="1" fill="#B98A56" />
     <rect x="24" y="10" width="3" height="1" fill="#B98A56" />
@@ -151,12 +152,16 @@ const PixelBasket = () => (
 );
 
 const PixelBin = () => (
-  <svg viewBox="0 0 18 22" shapeRendering="crispEdges" className="animate-vq-twinkle h-12 w-10">
-    <rect x="4" y="0" width="10" height="2" fill="#8D8071" />
-    <rect x="2" y="2" width="14" height="2" fill="#9AA5B1" />
-    <rect x="3" y="4" width="12" height="16" fill="#9AA5B1" />
-    <rect x="6" y="7" width="2" height="10" fill="#7C8794" />
-    <rect x="10" y="7" width="2" height="10" fill="#7C8794" />
+  <svg viewBox="0 0 18 24" shapeRendering="crispEdges" className="h-14 w-11">
+    <g className="animate-vq-lid">
+      <rect x="2" y="2" width="14" height="2" fill="#9AA5B1" />
+      <rect x="4" y="0" width="10" height="2" fill="#8D8071" />
+    </g>
+    <rect x="3" y="4" width="12" height="18" fill="#9AA5B1" />
+    <rect x="3" y="4" width="2" height="18" fill="#B4BEC8" />
+    <rect x="13" y="4" width="2" height="18" fill="#7C8794" />
+    <rect x="6" y="8" width="2" height="10" fill="#7C8794" />
+    <rect x="10" y="8" width="2" height="10" fill="#7C8794" />
   </svg>
 );
 
@@ -166,6 +171,73 @@ const PixelZzz = ({ className = "", style }: { className?: string; style?: CSSPr
     <rect x="2" y="1" width="1" height="1" fill="#8D8071" />
     <rect x="1" y="2" width="1" height="1" fill="#8D8071" />
     <rect x="0" y="3" width="4" height="1" fill="#8D8071" />
+  </svg>
+);
+
+const PixelScoop = ({ className = "" }: { className?: string }) => (
+  <svg viewBox="0 0 12 16" shapeRendering="crispEdges" className={className} aria-hidden>
+    <rect x="5" y="0" width="2" height="9" fill="#C96F2B" />
+    <rect x="2" y="9" width="8" height="6" fill="#9AA5B1" />
+    <rect x="3" y="10" width="6" height="2" fill="#D9B98C" />
+  </svg>
+);
+
+const PixelSqueegee = () => (
+  <svg viewBox="0 0 10 26" shapeRendering="crispEdges" className="h-12 w-5" aria-hidden>
+    <rect x="4" y="0" width="2" height="18" fill="#C96F2B" />
+    <rect x="1" y="18" width="8" height="4" fill="#7FB5D6" />
+    <rect x="1" y="22" width="8" height="2" fill="#A5D8EC" />
+  </svg>
+);
+
+const PixelCan = () => (
+  <svg viewBox="0 0 18 16" shapeRendering="crispEdges" className="h-10 w-11" aria-hidden>
+    <rect x="3" y="5" width="11" height="10" fill="#8FA6AD" />
+    <rect x="3" y="5" width="11" height="2" fill="#AFC3C9" />
+    <rect x="14" y="3" width="4" height="2" fill="#8FA6AD" />
+    <rect x="15" y="5" width="3" height="3" fill="#7C929A" />
+    <rect x="0" y="0" width="2" height="6" fill="#8FA6AD" />
+    <rect x="1" y="0" width="5" height="2" fill="#AFC3C9" />
+  </svg>
+);
+
+const PixelFlower = ({ className = "" }: { className?: string }) => (
+  <svg viewBox="0 0 7 12" shapeRendering="crispEdges" className={className} aria-hidden>
+    <rect x="3" y="5" width="1" height="7" fill="#6FA85A" />
+    <rect x="1" y="8" width="2" height="1" fill="#6FA85A" />
+    <rect x="4" y="7" width="2" height="1" fill="#8BC34A" />
+    <rect x="2" y="1" width="3" height="3" fill="#E86A8A" />
+    <rect x="3" y="0" width="1" height="1" fill="#F08AA8" />
+    <rect x="3" y="2" width="1" height="1" fill="#FFD97A" />
+  </svg>
+);
+
+const PixelBag = ({ className = "" }: { className?: string }) => (
+  <svg viewBox="0 0 10 12" shapeRendering="crispEdges" className={className} aria-hidden>
+    <rect x="1" y="2" width="8" height="9" fill="#D9D2C4" />
+    <rect x="1" y="2" width="8" height="2" fill="#C4BCAC" />
+    <rect x="3" y="0" width="4" height="2" fill="#B4AC9C" />
+  </svg>
+);
+
+const PixelBox = ({ className = "", style }: { className?: string; style?: CSSProperties }) => (
+  <svg viewBox="0 0 14 12" shapeRendering="crispEdges" className={className} style={style} aria-hidden>
+    <rect x="0" y="0" width="14" height="12" fill="#C9A876" />
+    <rect x="0" y="0" width="14" height="2" fill="#B08A5A" />
+    <rect x="6" y="0" width="2" height="12" fill="#B08A5A" />
+    <rect x="0" y="0" width="14" height="1" fill="#E0C79A" />
+  </svg>
+);
+
+const PixelButterfly = () => (
+  <svg viewBox="0 0 10 8" shapeRendering="crispEdges" className="h-3.5 w-4" aria-hidden>
+    <g className="animate-vq-flap">
+      <rect x="0" y="1" width="4" height="3" fill="#7FB5D6" />
+      <rect x="0" y="4" width="3" height="2" fill="#5E96C4" />
+      <rect x="6" y="1" width="4" height="3" fill="#7FB5D6" />
+      <rect x="7" y="4" width="3" height="2" fill="#5E96C4" />
+    </g>
+    <rect x="4" y="1" width="2" height="6" fill="#3E2C22" />
   </svg>
 );
 
@@ -187,8 +259,8 @@ const PixelRoom = ({
   >
     <defs>
       <linearGradient id="vq-wall" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stopColor="#F4E6C8" />
-        <stop offset="1" stopColor="#E0CBA2" />
+        <stop offset="0" stopColor="#E9EDDA" />
+        <stop offset="1" stopColor="#D2DCC0" />
       </linearGradient>
       <linearGradient id="vq-floor" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0" stopColor="#A5764A" />
@@ -208,6 +280,8 @@ const PixelRoom = ({
       </filter>
     </defs>
     <rect x="0" y="0" width="160" height="92" fill="url(#vq-wall)" />
+    <rect x="0" y="70" width="160" height="18" fill="#C4D2B4" />
+    <rect x="0" y="70" width="160" height="1" fill="#B0C2A0" />
     <rect x="0" y="88" width="160" height="4" fill="#D9B98C" />
     <rect x="0" y="92" width="160" height="28" fill="url(#vq-floor)" />
     {[99, 106, 113, 120, 127, 134, 141, 148].map((y) => (
@@ -265,8 +339,8 @@ const PixelRoom = ({
 
     <rect x="0" y="92" width="160" height="7" fill="url(#vq-ao)" />
 
-    <rect x="12" y="14" width="18" height="14" fill={TRIM} />
-    <rect x="14" y="16" width="14" height="10" fill="#FFE9D6" />
+    <rect x="12" y="14" width="18" height="14" fill="#8B5E34" />
+    <rect x="14" y="16" width="14" height="10" fill="#FFF6E4" />
     <rect x="14" y="21" width="14" height="5" fill="#FFD9A8" />
     <rect x="14" y="24" width="14" height="2" fill="#6FA85A" />
     <rect x="23" y="17" width="2" height="2" fill="#FF7000" />
@@ -275,6 +349,22 @@ const PixelRoom = ({
     <rect x="12" y="14" width="16" height="9" fill="#D8EEF6" />
     <rect x="13" y="15" width="1" height="4" fill="#FFF" />
     <rect x="14" y="14" width="1" height="2" fill="#FFF" />
+
+    <rect x="8" y="26" width="30" height="14" fill="#A8CFC4" />
+    <rect x="8" y="32" width="30" height="1" fill="#8FB8AC" />
+    <rect x="18" y="26" width="1" height="14" fill="#8FB8AC" />
+    <rect x="28" y="26" width="1" height="14" fill="#8FB8AC" />
+    <rect x="8" y="26" width="30" height="1" fill="#8FB8AC" />
+
+    <rect x="66" y="54" width="30" height="3" fill="#B98A56" />
+    <rect x="68" y="57" width="2" height="4" fill="#9A6B3F" />
+    <rect x="92" y="57" width="2" height="4" fill="#9A6B3F" />
+    <rect x="70" y="45" width="4" height="9" fill="#5E9691" />
+    <rect x="75" y="47" width="4" height="7" fill="#E0A23C" />
+    <rect x="80" y="44" width="4" height="10" fill="#E0705A" />
+    <rect x="85" y="48" width="3" height="6" fill="#7FB5D6" />
+    <rect x="70" y="45" width="4" height="1" fill="#7FC4BE" />
+    <rect x="80" y="44" width="4" height="1" fill="#F09A85" />
 
     <rect x="20" y="33" width="3" height="4" fill="#9AA5B1" />
     <rect x="14" y="33" width="9" height="3" fill="#9AA5B1" />
@@ -296,6 +386,10 @@ const PixelRoom = ({
         <rect x="20" y="38" width="2" height="2" fill="#FFF" className="animate-vq-rise" style={{ animationDelay: "1s" }} />
         <rect x="16" y="47" width="2" height="2" fill="#7FB5D6" className="animate-vq-drip" />
         <rect x="24" y="47" width="2" height="2" fill="#7FB5D6" className="animate-vq-drip" style={{ animationDelay: "0.45s" }} />
+        <g className="animate-vq-scrub">
+          <rect x="17" y="46" width="8" height="2" fill="#FFF" />
+          <rect x="18" y="45" width="6" height="1" fill="#F0EBE0" />
+        </g>
       </g>
     ) : null}
 
@@ -337,14 +431,14 @@ const PixelRoom = ({
     <ellipse cx="120" cy="90" rx="13" ry="2.4" fill="#3E2C22" opacity="0.22" filter="url(#vq-soft)" />
     <rect x="108" y="82" width="24" height="3" fill="#C9A876" />
     <rect x="110" y="85" width="20" height="4" fill="#B08A5A" />
-    <rect x="111" y="83" width="18" height="3" fill="#FFE9D6" />
-    <rect x="111" y="85" width="18" height="1" fill="#E8D4B8" />
+    <rect x="111" y="83" width="18" height="3" fill="#DCE3C8" />
+    <rect x="111" y="85" width="18" height="1" fill="#C4D2B4" />
 
-    <rect x="66" y="98" width="48" height="16" fill="#FFE9D6" />
-    <rect x="66" y="98" width="48" height="2" fill="#FFD9A8" />
-    <rect x="66" y="112" width="48" height="2" fill="#FFD9A8" />
-    <rect x="70" y="102" width="40" height="8" fill="#FFCF99" opacity="0.7" />
-    <rect x="86" y="104" width="8" height="4" fill="#FF7000" opacity="0.5" />
+    <rect x="66" y="98" width="48" height="16" fill="#7FB5B0" />
+    <rect x="66" y="98" width="48" height="2" fill="#5E9691" />
+    <rect x="66" y="112" width="48" height="2" fill="#5E9691" />
+    <rect x="70" y="102" width="40" height="8" fill="#A8D5D0" opacity="0.75" />
+    <rect x="86" y="104" width="8" height="4" fill="#FF8A66" />
 
     {complete ? (
       <g className="animate-vq-twinkle">
@@ -450,9 +544,12 @@ export function CatScene({
             key={`hop-${hopKey}`}
             className={hopKey > 0 ? "animate-vq-hop" : undefined}
           >
-            <div key={activityKey} className={catPose}>
+            <div
+              key={activityKey}
+              className={celebrating ? "animate-vq-hops" : catPose}
+            >
               <PixelCat
-                happy={complete}
+                happy={complete || celebrating}
                 sleepy={sleeping}
                 excited={active}
                 className="size-32 drop-shadow-md"
@@ -471,20 +568,30 @@ export function CatScene({
           : null}
         {activity === "sweep" ? (
           <div className="relative">
-            <PixelBroom />
-            {[0, 450].map((delay, index) => (
+            <div className="animate-vq-sway" style={{ animationDuration: "620ms" }}>
+              <PixelBroom />
+            </div>
+            {[-12, -4, 4, 12, 18].map((drift, index) => (
               <span
-                key={delay}
+                key={drift}
                 className="animate-vq-particle absolute bottom-1 bg-[#C9B896]"
-                style={{
-                  left: `${4 + index * 6}px`,
-                  width: 3,
-                  height: 3,
-                  animationDelay: `${delay}ms`,
-                }}
+                style={
+                  {
+                    left: `${3 + index * 5}px`,
+                    width: 3,
+                    height: 3,
+                    animationDelay: `${index * 180}ms`,
+                    "--vq-drift": `${drift}px`,
+                  } as CSSProperties
+                }
                 aria-hidden
               />
             ))}
+            <div className="absolute -bottom-1 left-2 flex items-end gap-0.5" aria-hidden>
+              <span className="size-1.5 bg-[#B8A688]" />
+              <span className="size-1 bg-[#C9B896]" />
+              <span className="size-1.5 bg-[#B8A688]" />
+            </div>
           </div>
         ) : null}
         {activity === "dust" ? (
@@ -502,31 +609,35 @@ export function CatScene({
                 }}
               />
             ))}
-          </div>
-        ) : null}
-        {activity === "vacuum" ? (
-          <div className="relative -ml-3">
-            <div className="animate-vq-bob">
-              <PixelVacuum />
-            </div>
-            {[200, 800].map((delay, index) => (
+            {[0, 500].map((delay, index) => (
               <span
                 key={delay}
-                className="animate-vq-twinkle absolute -bottom-1 size-1 bg-[#8A6B4A]"
-                style={{ left: `${8 + index * 10}px`, animationDelay: `${delay}ms` }}
+                className="animate-vq-particle absolute bottom-4 size-2.5 rounded-full bg-[#D8CFBB] opacity-80 blur-[1px]"
+                style={{ left: `${6 + index * 14}px`, animationDelay: `${delay}ms` }}
                 aria-hidden
               />
             ))}
+            <PixelStar
+              color="#FFD97A"
+              className="animate-vq-twinkle absolute -top-6 left-8 h-3.5 w-3.5"
+            />
           </div>
         ) : null}
         {activity === "litter" ? (
           <div className="relative">
             <PixelLitterBox />
-            {[0, 220, 440].map((delay, index) => (
+            <PixelScoop className="animate-vq-dig absolute -top-5 right-1 h-7 w-5" />
+            {[-14, 12, -6, 18, 4, -18].map((drift, index) => (
               <span
-                key={delay}
-                className="animate-vq-particle absolute bottom-7 size-1.5 bg-[#D9B98C]"
-                style={{ left: `${2 + index * 7}px`, animationDelay: `${delay}ms` }}
+                key={drift}
+                className="animate-vq-toss absolute bottom-7 size-1.5 bg-[#D9B98C]"
+                style={
+                  {
+                    left: `${3 + index * 5}px`,
+                    animationDelay: `${index * 140}ms`,
+                    "--vq-drift": `${drift}px`,
+                  } as CSSProperties
+                }
                 aria-hidden
               />
             ))}
@@ -538,7 +649,7 @@ export function CatScene({
             <svg
               viewBox="0 0 8 8"
               shapeRendering="crispEdges"
-              className="animate-vq-tumble absolute -top-7 left-2 h-4 w-4"
+              className="animate-vq-tumble absolute -top-7 left-1 h-4 w-4"
               aria-hidden
             >
               <rect x="1" y="1" width="6" height="6" fill="#FF8A33" />
@@ -547,43 +658,84 @@ export function CatScene({
             <svg
               viewBox="0 0 8 8"
               shapeRendering="crispEdges"
-              className="animate-vq-tumble absolute -top-9 left-9 h-3.5 w-3.5"
+              className="animate-vq-tumble absolute -top-9 left-7 h-3.5 w-3.5"
               style={{ animationDelay: "400ms" }}
               aria-hidden
             >
               <rect x="1" y="1" width="6" height="6" fill="#7FB5D6" />
               <rect x="4" y="4" width="2" height="2" fill="#A5D8EC" />
             </svg>
+            <svg
+              viewBox="0 0 6 8"
+              shapeRendering="crispEdges"
+              className="animate-vq-jump absolute -top-6 left-12 h-4 w-3"
+              style={{ animationDelay: "700ms" }}
+              aria-hidden
+            >
+              <rect x="1" y="0" width="4" height="6" fill="#E86A8A" />
+              <rect x="1" y="6" width="2" height="2" fill="#D15A79" />
+            </svg>
+            <PixelStar
+              color="#A5D8EC"
+              className="animate-vq-twinkle absolute -top-11 left-4 h-3 w-3"
+            />
           </div>
         ) : null}
-        {activity === "trash" ? <PixelBin /> : null}
+        {activity === "trash" ? (
+          <div className="relative">
+            <PixelBag className="animate-vq-drop-in absolute -top-8 left-2 h-4 w-3.5" />
+            <PixelBin />
+          </div>
+        ) : null}
         {activity === "tidy" ? (
-          <svg
-            viewBox="0 0 14 12"
-            shapeRendering="crispEdges"
-            className="animate-vq-twinkle h-10 w-12"
-            aria-hidden
-          >
-            <rect x="1" y="4" width="12" height="7" fill="#C9A876" />
-            <rect x="1" y="4" width="12" height="2" fill="#B08A5A" />
-            <rect x="4" y="0" width="6" height="4" fill="#FFE9D6" />
-          </svg>
+          <div className="relative h-14 w-12">
+            <PixelBox className="animate-vq-drop-in absolute bottom-0 left-0 h-8 w-9" />
+            <PixelBox
+              className="animate-vq-drop-in absolute bottom-7 left-1 h-7 w-8"
+              style={{ animationDelay: "260ms" }}
+            />
+            <PixelBox
+              className="animate-vq-drop-in absolute bottom-13 left-2 h-6 w-7"
+              style={{ animationDelay: "520ms" }}
+            />
+            <PixelStar
+              color="#FFD97A"
+              className="animate-vq-twinkle absolute -top-2 left-8 h-3.5 w-3.5"
+              style={{ animationDelay: "900ms" }}
+            />
+          </div>
         ) : null}
         {activity === "garden" ? (
-          <>
-            {[0, 350].map((delay, index) => (
+          <div className="relative">
+            <div className="animate-vq-pour">
+              <PixelCan />
+            </div>
+            {[0, 350, 700].map((delay, index) => (
               <span
                 key={delay}
-                className="animate-vq-particle absolute -top-6 size-2 bg-[#6FA85A]"
-                style={{
-                  left: `${index * 10}px`,
-                  animationDelay: `${delay}ms`,
-                  "--vq-drift": index === 0 ? "12px" : "-10px",
-                } as CSSProperties}
+                className="animate-vq-drip absolute top-8 text-[9px] text-[#7FB5D6]"
+                style={{ left: `${12 + index * 4}px`, animationDelay: `${delay}ms` }}
+                aria-hidden
+              >
+                ▼
+              </span>
+            ))}
+            <PixelFlower className="animate-vq-bloom absolute -top-9 left-10 h-6 w-4" />
+            {[0, 500].map((delay, index) => (
+              <span
+                key={delay}
+                className="animate-vq-particle absolute -top-8 size-1.5 bg-[#6FA85A]"
+                style={
+                  {
+                    left: `${index * 12}px`,
+                    animationDelay: `${delay}ms`,
+                    "--vq-drift": index === 0 ? "14px" : "-10px",
+                  } as CSSProperties
+                }
                 aria-hidden
               />
             ))}
-          </>
+          </div>
         ) : null}
         {activity === "windows" ? (
           <PixelStar
@@ -591,7 +743,72 @@ export function CatScene({
             className="animate-vq-twinkle absolute -top-10 h-4 w-4"
           />
         ) : null}
+        {activity === "windows" ? (
+          <div
+            className="absolute right-[7%] top-[10%] flex items-center gap-2"
+            aria-hidden
+          >
+            <div className="h-6 w-10 -skew-x-12 bg-white/50 blur-[2px] animate-vq-squeegee" />
+            <div className="animate-vq-squeegee" style={{ animationDelay: "200ms" }}>
+              <PixelSqueegee />
+            </div>
+          </div>
+        ) : null}
       </div>
+
+      {activity === "vacuum" ? (
+        <div
+          className="absolute bottom-[15%] left-[30%] w-[90px]"
+          key={`vac-${activityKey}`}
+          aria-hidden
+        >
+          <div className="animate-vq-patrol">
+            <div className="animate-vq-bob">
+              <PixelVacuum />
+            </div>
+          </div>
+          {[0, 400, 800].map((delay) => (
+            <PixelStar
+              key={delay}
+              color="#A8D5D0"
+              className="animate-vq-particle absolute -left-6 bottom-1 h-3 w-3"
+              style={{ animationDelay: `${delay}ms` }}
+            />
+          ))}
+          {[300, 900].map((delay, index) => (
+            <span
+              key={delay}
+              className="animate-vq-twinkle absolute -bottom-1 size-1 bg-[#8A6B4A]"
+              style={{ left: `${6 + index * 14}px`, animationDelay: `${delay}ms` }}
+            />
+          ))}
+        </div>
+      ) : null}
+
+      {!night && !active && !complete ? (
+        <div
+          className="animate-vq-fly absolute bottom-[34%] left-0"
+          key="butterfly"
+          aria-hidden
+        >
+          <PixelButterfly />
+        </div>
+      ) : null}
+
+      {night && !active && !complete
+        ? [
+            { left: "70%", bottom: "40%", delay: "0s" },
+            { left: "80%", bottom: "30%", delay: "1.1s" },
+            { left: "62%", bottom: "26%", delay: "2.2s" },
+          ].map((firefly, index) => (
+            <span
+              key={index}
+              className="animate-vq-glow absolute size-1.5 rounded-full bg-[#F2EBA2] shadow-[0_0_6px_2px_rgba(242,235,162,0.6)]"
+              style={{ left: firefly.left, bottom: firefly.bottom, animationDelay: firefly.delay }}
+              aria-hidden
+            />
+          ))
+        : null}
 
       <div className="pointer-events-none absolute inset-x-0 bottom-[30%] flex justify-center">
         {particles.map((particle) =>
@@ -636,6 +853,11 @@ export function CatScene({
         <>
           <div
             className="animate-vq-burst absolute bottom-[20%] left-1/2 size-32 rounded-full border-4 border-accent/60"
+            aria-hidden
+          />
+          <div
+            className="animate-vq-burst absolute bottom-[20%] left-1/2 size-32 rounded-full border-2 border-[#E86A8A]/50"
+            style={{ animationDelay: "300ms" }}
             aria-hidden
           />
           {CELEBRATION.map((particle, index) =>

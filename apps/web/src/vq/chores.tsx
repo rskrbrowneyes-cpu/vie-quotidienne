@@ -35,13 +35,40 @@ const FREQUENCIES: ChoreFrequency[] = [
   "autumn",
 ];
 
-const GROUP_META: Record<ChoreFrequency, { icon: string; boss: boolean }> = {
-  daily: { icon: "⚡", boss: false },
-  weekly: { icon: "🗺️", boss: false },
-  monthly: { icon: "👹", boss: true },
-  quarterly: { icon: "🐉", boss: true },
-  spring: { icon: "🌸", boss: true },
-  autumn: { icon: "🍂", boss: true },
+const GROUP_META: Record<
+  ChoreFrequency,
+  { icon: string; boss: boolean; chip: string }
+> = {
+  daily: {
+    icon: "⚡",
+    boss: false,
+    chip: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+  },
+  weekly: {
+    icon: "🗺️",
+    boss: false,
+    chip: "bg-teal-500/15 text-teal-700 dark:text-teal-300",
+  },
+  monthly: {
+    icon: "👹",
+    boss: true,
+    chip: "bg-violet-500/15 text-violet-700 dark:text-violet-300",
+  },
+  quarterly: {
+    icon: "🐉",
+    boss: true,
+    chip: "bg-rose-500/15 text-rose-700 dark:text-rose-300",
+  },
+  spring: {
+    icon: "🌸",
+    boss: true,
+    chip: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+  },
+  autumn: {
+    icon: "🍂",
+    boss: true,
+    chip: "bg-orange-500/15 text-orange-700 dark:text-orange-300",
+  },
 };
 
 const FREQUENCY_OPTIONS: { value: ChoreFrequency; label: string }[] = [
@@ -476,7 +503,9 @@ export const ChoresModule = () => {
                             >
                               {chore.name}
                             </span>
-                            <span className="shrink-0 rounded-full bg-accent-soft px-1.5 py-0.5 text-[10px] font-semibold text-accent-ink">
+                            <span
+                              className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${meta.chip}`}
+                            >
                               +{xpFor(chore.frequency)}
                             </span>
                             <button
@@ -564,7 +593,9 @@ export const ChoresModule = () => {
                     {formatDateTime(entry.completedAt)}
                   </p>
                 </div>
-                <span className="shrink-0 text-[10px] font-semibold text-accent-ink">
+                <span
+                  className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${GROUP_META[entry.frequency].chip}`}
+                >
                   +{xpFor(entry.frequency)}
                 </span>
                 <button

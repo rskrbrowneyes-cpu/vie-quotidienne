@@ -281,6 +281,178 @@
   }
 }
 
+@keyframes vq-patrol {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  42% {
+    transform: translateX(110px);
+  }
+  50% {
+    transform: translateX(110px);
+  }
+  92% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes vq-scrub {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(-1px, 0) rotate(-10deg);
+  }
+  75% {
+    transform: translate(1px, 0) rotate(10deg);
+  }
+}
+
+@keyframes vq-toss {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(calc(var(--vq-drift, 8px) / 2), -16px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--vq-drift, 8px), -2px);
+  }
+}
+
+@keyframes vq-jump {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  35%,
+  55% {
+    transform: translateY(-20px) rotate(24deg);
+  }
+}
+
+@keyframes vq-lid {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25%,
+  55% {
+    transform: rotate(-38deg);
+  }
+}
+
+@keyframes vq-squeegee {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(30px);
+    opacity: 1;
+  }
+}
+
+@keyframes vq-pour {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-30deg);
+  }
+}
+
+@keyframes vq-bloom {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.25);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes vq-drop-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-56px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  80% {
+    transform: translateY(-4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes vq-fly {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(80px, -14px);
+  }
+  50% {
+    transform: translate(160px, -2px);
+  }
+  75% {
+    transform: translate(240px, -16px);
+  }
+  100% {
+    transform: translate(330px, -4px);
+  }
+}
+
+@keyframes vq-flap {
+  0%,
+  100% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(0.25);
+  }
+}
+
+@keyframes vq-hops {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  12% {
+    transform: translateY(-18px);
+  }
+  24% {
+    transform: translateY(0);
+  }
+  36% {
+    transform: translateY(-14px);
+  }
+  48% {
+    transform: translateY(0);
+  }
+  60% {
+    transform: translateY(-10px);
+  }
+  72% {
+    transform: translateY(0);
+  }
+}
+
 @keyframes vq-parallax {
   0%,
   100% {
@@ -582,6 +754,66 @@
   transform-origin: center bottom;
 }
 
+.animate-vq-patrol {
+  animation: vq-patrol 5.5s ease-in-out infinite;
+}
+
+.animate-vq-scrub {
+  animation: vq-scrub 500ms ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.animate-vq-toss {
+  animation: vq-toss 750ms ease-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.animate-vq-jump {
+  animation: vq-jump 1.4s ease-in-out infinite;
+}
+
+.animate-vq-lid {
+  animation: vq-lid 2s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: 20% 100%;
+}
+
+.animate-vq-squeegee {
+  animation: vq-squeegee 1.2s ease-in-out infinite alternate;
+}
+
+.animate-vq-pour {
+  animation: vq-pour 1.8s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: 80% 10%;
+}
+
+.animate-vq-bloom {
+  animation: vq-bloom 900ms ease-out forwards;
+  transform-box: fill-box;
+  transform-origin: center bottom;
+}
+
+.animate-vq-drop-in {
+  animation: vq-drop-in 700ms ease-out forwards;
+}
+
+.animate-vq-fly {
+  animation: vq-fly 20s linear infinite;
+}
+
+.animate-vq-flap {
+  animation: vq-flap 280ms ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.animate-vq-hops {
+  animation: vq-hops 1.4s ease-in-out;
+}
+
 .animate-vq-celebrate {
   animation: vq-celebrate 1.7s ease-in forwards;
 }
@@ -640,7 +872,19 @@
   .animate-vq-drift,
   .animate-vq-wobble,
   .animate-vq-twinkle,
-  .animate-vq-parallax {
+  .animate-vq-parallax,
+  .animate-vq-patrol,
+  .animate-vq-scrub,
+  .animate-vq-toss,
+  .animate-vq-jump,
+  .animate-vq-lid,
+  .animate-vq-squeegee,
+  .animate-vq-pour,
+  .animate-vq-bloom,
+  .animate-vq-drop-in,
+  .animate-vq-fly,
+  .animate-vq-flap,
+  .animate-vq-hops {
     animation: none;
   }
 }
