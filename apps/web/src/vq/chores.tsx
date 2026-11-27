@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { CSSProperties, FormEvent } from "react";
+import type { FormEvent } from "react";
 
 import {
   BADGES,
@@ -22,7 +22,8 @@ import {
   xpFor,
 } from "./storage";
 import type { Chore, ChoreFrequency, ChoreHistoryEntry } from "./storage";
-import { GingerCat } from "./cat";
+import { CatScene } from "./scene";
+import type { Activity } from "./scene";
 import { SwipeToDelete } from "./swipe";
 
 const FREQUENCIES: ChoreFrequency[] = [
@@ -52,37 +53,33 @@ const FREQUENCY_OPTIONS: { value: ChoreFrequency; label: string }[] = [
   { value: "autumn", label: "Automne" },
 ];
 
-const PARTICLE_EMOJIS: { pattern: RegExp; emojis: [string, string] }[] = [
-  { pattern: /liti[èe]re|d[ée]jection|bac/i, emojis: ["🐾", "✨"] },
-  { pattern: /aspir|robot|sol|marche|balay/i, emojis: ["🫧", "✨"] },
-  { pattern: /poussi|plinthe|vmc|grille|hotte|cr[ée]dence|évier|robinetter/i, emojis: ["✨", "🫧"] },
-  { pattern: /lessive|linge|draps|serviette|plaid|houss|rideau|matelas|textile/i, emojis: ["🫧", "🧺"] },
-  { pattern: /vitre|miroir|hublot/i, emojis: ["✨", "💧"] },
-  { pattern: /four|micro-ondes|poubelle|d[ée]graissa|frigidaire|réfrigérateur|tarte|détart|joint/i, emojis: ["🫧", "✨"] },
-  { pattern: /terrasse|buisson|feuille|végétal|jardin|gel/i, emojis: ["🌿", "✨"] },
-  { pattern: /rang|trie|placard|rangement|organis|a[ée]rer/i, emojis: ["📦", "✨"] },
-  { pattern: /wc|toilette|chasse|cuvette|douche|salle de bain|lave-linge/i, emojis: ["🫧", "💧"] },
+const CHORE_THEMES: {
+  pattern: RegExp;
+  activity: Activity;
+  emojis: [string, string];
+}[] = [
+  { pattern: /liti[èe]re|d[ée]jection|bac/i, activity: "litter", emojis: ["🐾", "✨"] },
+  { pattern: /aspir|robot/i, activity: "vacuum", emojis: ["🫧", "✨"] },
+  { pattern: /balay/i, activity: "sweep", emojis: ["🧹", "✨"] },
+  { pattern: /vaisselle|évier|plaque/i, activity: "dishes", emojis: ["🫧", "✨"] },
+  { pattern: /poussi|plinthe|vmc|grille|hotte|cr[ée]dence/i, activity: "dust", emojis: ["✨", "🫧"] },
+  { pattern: /lessive|linge|draps|serviette|plaid|houss|rideau|matelas|textile/i, activity: "laundry", emojis: ["🫧", "🧺"] },
+  { pattern: /vitre|miroir|hublot/i, activity: "windows", emojis: ["✨", "💧"] },
+  { pattern: /poubelle|four|micro-ondes|d[ée]graissa|réfrigérateur|frigidaire|tarte|détart|joint/i, activity: "trash", emojis: ["🫧", "✨"] },
+  { pattern: /terrasse|buisson|feuille|végétal|jardin|gel/i, activity: "garden", emojis: ["🌿", "✨"] },
+  { pattern: /rang|trie|placard|rangement|organis|a[ée]rer|sol|marche|douche|wc|toilette|chasse|cuvette|salle de bain|lave-linge/i, activity: "tidy", emojis: ["📦", "✨"] },
 ];
 
-const emojiForChore = (name: string): [string, string] => {
-  for (const rule of PARTICLE_EMOJIS) {
-    if (rule.pattern.test(name)) {
-      return rule.emojis;
+const themeForChore = (
+  name: string
+): { activity: Activity; emojis: [string, string] } => {
+  for (const theme of CHORE_THEMES) {
+    if (theme.pattern.test(name)) {
+      return { activity: theme.activity, emojis: theme.emojis };
     }
   }
-  return ["✨", "🫧"];
+  return { activity: "tidy", emojis: ["✨", "🫧"] };
 };
-
-const CELEBRATION_PARTICLES = [
-  { left: 8, delay: 0, emoji: "✨" },
-  { left: 22, delay: 120, emoji: "🫧" },
-  { left: 36, delay: 60, emoji: "🐾" },
-  { left: 50, delay: 200, emoji: "✨" },
-  { left: 63, delay: 90, emoji: "🧹" },
-  { left: 76, delay: 160, emoji: "🫧" },
-  { left: 88, delay: 30, emoji: "✨" },
-  { left: 45, delay: 260, emoji: "🐾" },
-];
 
 const sectionsOf = (chores: readonly Chore[]) => {
   const sections: { title: string | undefined; chores: Chore[] }[] = [];
@@ -119,8 +116,11 @@ export const ChoresModule = () => {
   const toastCounter = useRef(0);
   const [particles, setParticles] = useState<Particle[]>([]);
   const particleCounter = useRef(0);
-  const [sweepKey, setSweepKey] = useState(0);
+  const [activity, setActivity] = useState<Activity>("idle");
+  const [activityKey, setActivityKey] = useState(0);
+  const [hopKey, setHopKey] = useState(0);
   const [celebrating, setCelebrating] = useState(false);
+  const activityTimer = useRef<number | null>(null);
 
   const xp = computeXp(history);
   const { level, into, needed } = levelFromXp(xp);
@@ -169,8 +169,9 @@ export const ChoresModule = () => {
   };
 
   const spawnParticles = (choreName: string) => {
-    const [first, second] = emojiForChore(choreName);
-    const drifts = [-14, 6, 18];
+    const { activity: next, emojis } = themeForChore(choreName);
+    const [first, second] = emojis;
+    const drifts = [-18, 4, 20];
     particleCounter.current += 1;
     const base = particleCounter.current;
     setParticles((previous) => [
@@ -187,6 +188,16 @@ export const ChoresModule = () => {
         previous.filter((particle) => particle.id < base + drifts.length)
       );
     }, 1500);
+
+    if (activityTimer.current !== null) {
+      window.clearTimeout(activityTimer.current);
+    }
+    setActivity(next);
+    setActivityKey((previous) => previous + 1);
+    activityTimer.current = window.setTimeout(() => {
+      setActivity("idle");
+      activityTimer.current = null;
+    }, 3200);
   };
 
   const add = (event: FormEvent) => {
@@ -218,9 +229,6 @@ export const ChoresModule = () => {
       window.setTimeout(() => setPoppedId(null), 300);
 
       spawnParticles(chore.name);
-      if (chore.frequency === "daily") {
-        setSweepKey((previous) => previous + 1);
-      }
 
       const gained = xpFor(chore.frequency);
       const nextLevel = levelFromXp(computeXp(history) + gained).level;
@@ -242,6 +250,7 @@ export const ChoresModule = () => {
       pushToast(`+${gained} XP`);
       if (nextLevel > level) {
         pushToast(`🎉 Niveau ${nextLevel} atteint !`);
+        setHopKey((previous) => previous + 1);
       }
     }
   };
@@ -264,67 +273,44 @@ export const ChoresModule = () => {
     b.completedAt.localeCompare(a.completedAt)
   );
 
+  const progress =
+    dailyChores.length === 0 ? 0 : dailyDone / dailyChores.length;
+
   return (
     <section className="flex flex-col gap-4">
-      <div className="relative overflow-hidden rounded-2xl border-2 border-accent bg-gradient-to-br from-accent-soft to-raised p-4">
-        <div className="flex items-center gap-3">
-          <div className="relative shrink-0">
-            <GingerCat
-              happy={missionComplete}
-              className="size-12 animate-vq-bob"
-            />
-            {missionComplete ? (
-              <span
-                className="animate-vq-heart absolute -top-1 right-0 text-xs"
-                aria-hidden
-              >
-                💕
-              </span>
-            ) : null}
-            {missionComplete ? (
-              <span
-                className="animate-vq-heart absolute -top-2 left-0 text-[10px]"
-                style={{ animationDelay: "500ms" }}
-                aria-hidden
-              >
-                💕
-              </span>
-            ) : null}
-          </div>
-          <div className="min-w-0 flex-1">
+      <CatScene
+        progress={progress}
+        complete={missionComplete}
+        celebrating={celebrating}
+        activity={activity}
+        activityKey={activityKey}
+        hopKey={hopKey}
+        particles={particles}
+      >
+        <div className="border-t-2 border-accent bg-surface/85 px-4 py-3 backdrop-blur-sm">
+          <div className="flex items-center justify-between">
             <p className="text-sm font-semibold">
               Niveau {level} · {rankTitle(level)}
             </p>
-            <p className="text-xs text-muted">
-              🔥 série de {streak} jour{streak > 1 ? "s" : ""} ·{" "}
-              {monthValidations} validation{monthValidations > 1 ? "s" : ""} ce
-              mois
-              {rate !== null ? ` · ⚡ précision 7 j : ${rate} %` : ""}
-            </p>
+            <p className="text-sm font-bold text-accent-ink">{xp} XP</p>
           </div>
-          <div className="shrink-0 text-right">
-            <p className="text-lg font-bold text-accent-ink">{xp} XP</p>
+          <div className="mt-2 h-3 overflow-hidden rounded-full bg-raised">
+            <div
+              className="animate-vq-shine h-full rounded-full bg-accent"
+              style={{ width: `${Math.round((into / needed) * 100)}%` }}
+            />
           </div>
+          <p className="mt-1 flex items-center justify-between text-[10px] text-muted">
+            <span>
+              🔥 {streak} j · 🗓️ {monthValidations} ce mois
+              {rate !== null ? ` · ⚡ ${rate} %` : ""}
+            </span>
+            <span>
+              🧼 {Math.round(progress * 100)} % · {into}/{needed} XP
+            </span>
+          </p>
         </div>
-        <div className="mt-3 h-3 overflow-hidden rounded-full bg-surface">
-          <div
-            className="animate-vq-shine h-full rounded-full bg-accent"
-            style={{ width: `${Math.round((into / needed) * 100)}%` }}
-          />
-        </div>
-        <p className="mt-1 text-right text-[10px] text-muted">
-          {into}/{needed} XP vers le niveau {level + 1}
-        </p>
-        {sweepKey > 0 ? (
-          <span
-            key={sweepKey}
-            className="animate-vq-sweep absolute bottom-1 left-0 text-2xl"
-            aria-hidden
-          >
-            🧹
-          </span>
-        ) : null}
-      </div>
+      </CatScene>
 
       <div
         className={`relative overflow-hidden rounded-2xl border p-4 ${
@@ -333,21 +319,6 @@ export const ChoresModule = () => {
             : "border-dashed border-line bg-surface"
         }`}
       >
-        {celebrating
-          ? CELEBRATION_PARTICLES.map((particle, index) => (
-              <span
-                key={index}
-                className="animate-vq-celebrate absolute top-0 text-lg"
-                style={{
-                  left: `${particle.left}%`,
-                  animationDelay: `${particle.delay}ms`,
-                }}
-                aria-hidden
-              >
-                {particle.emoji}
-              </span>
-            ))
-          : null}
         <div className="flex items-center justify-between">
           <p className="text-sm font-semibold">
             {missionComplete ? "🎉 Mission accomplie !" : "⚡ Mission du jour"}
@@ -603,24 +574,6 @@ export const ChoresModule = () => {
             Vos quêtes accomplies s'afficheront ici.
           </p>
         ) : null}
-      </div>
-
-      <div className="pointer-events-none fixed inset-x-0 bottom-32 z-50 flex justify-center">
-        {particles.map((particle) => (
-          <span
-            key={particle.id}
-            className="animate-vq-particle absolute text-lg"
-            style={
-              {
-                "--vq-drift": `${particle.drift}px`,
-                animationDelay: `${particle.delay}ms`,
-              } as CSSProperties
-            }
-            aria-hidden
-          >
-            {particle.emoji}
-          </span>
-        ))}
       </div>
 
       <div className="pointer-events-none fixed inset-x-0 bottom-24 z-50 flex flex-col items-center gap-1">
