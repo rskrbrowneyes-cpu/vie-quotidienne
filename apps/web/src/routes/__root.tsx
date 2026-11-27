@@ -44,6 +44,8 @@ const RootDocument = ({ children }: { children: ReactNode }) => {
   );
 };
 
+const appBase = import.meta.env.BASE_URL;
+
 export const Route = createRootRouteWithContext<RouterContext>()({
   // The locale the root screens speak (`root-screens.tsx`). The server resolves it per request and
   // the browser hydrates with that answer, as the router carries `beforeLoad`'s context; in the
@@ -58,8 +60,8 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
-      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "icon", type: "image/svg+xml", href: `${appBase}favicon.svg` },
+      { rel: "manifest", href: `${appBase}manifest.webmanifest` },
     ],
   }),
   shellComponent: RootDocument,

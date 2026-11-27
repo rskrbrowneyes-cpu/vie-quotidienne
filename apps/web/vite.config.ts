@@ -65,6 +65,7 @@ const contributedPlugins = async (): Promise<Plugin[]> => {
 };
 
 export default defineConfig(async ({ mode }) => ({
+  base: process.env.APP_BASE_PATH || "/",
   define: {
     // `src/app-name.ts` reads this, and falls back to a default name when it is empty. A variable
     // already in the environment (the web image's `APP_NAME` build arg) wins over the file.
@@ -80,7 +81,9 @@ export default defineConfig(async ({ mode }) => ({
   },
   plugins: [
     tailwindcss(),
-    tanstackStart(),
+    tanstackStart({
+      spa: { enabled: true },
+    }),
     nitro({
       // Brotli and gzip copies of each compressible build asset over 1 KB, which the server sends
       // to a browser that accepts them: `node .output/server/index.mjs` compresses nothing on the

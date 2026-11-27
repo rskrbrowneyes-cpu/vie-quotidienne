@@ -1,14 +1,15 @@
 {
   "name": "Vie quotidienne",
   "short_name": "Vie quotidienne",
-  "start_url": "/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "lang": "fr",
   "background_color": "#020617",
   "theme_color": "#020617",
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"

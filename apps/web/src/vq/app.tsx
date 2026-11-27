@@ -25,6 +25,9 @@ export const App = () => {
 
   useEffect(() => {
     setMounted(true);
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`);
+    }
   }, []);
 
   return (
