@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties } from "react";
 
 import { GingerCat } from "./cat";
 
@@ -173,7 +173,6 @@ type CatSceneProps = {
   activityKey: number;
   hopKey: number;
   particles: SceneParticle[];
-  children: ReactNode;
 };
 
 export function CatScene({
@@ -184,7 +183,6 @@ export function CatScene({
   activityKey,
   hopKey,
   particles,
-  children,
 }: CatSceneProps) {
   const hour = new Date().getHours();
   const night = hour >= 20 || hour < 7;
@@ -200,7 +198,7 @@ export function CatScene({
         : "animate-vq-bob";
 
   return (
-    <div className="relative h-[46vh] max-h-[480px] min-h-[340px] overflow-hidden rounded-2xl border-2 border-accent bg-gradient-to-b from-accent-soft to-raised">
+    <div className="relative h-[38vh] max-h-[420px] min-h-[280px] overflow-hidden rounded-t-2xl border-2 border-b-0 border-accent bg-gradient-to-b from-accent-soft to-raised">
       {night ? (
         <>
           {STARS.map((star, index) => (
@@ -467,7 +465,6 @@ export function CatScene({
         </>
       ) : null}
 
-      <div className="absolute inset-x-0 bottom-0">{children}</div>
     </div>
   );
 }

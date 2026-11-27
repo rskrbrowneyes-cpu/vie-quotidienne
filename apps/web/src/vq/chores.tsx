@@ -287,8 +287,8 @@ export const ChoresModule = () => {
           activityKey={activityKey}
           hopKey={hopKey}
           particles={particles}
-        >
-        <div className="border-t-2 border-accent bg-surface/85 px-4 py-3 backdrop-blur-sm">
+        />
+        <div className="rounded-b-2xl border-2 border-t-0 border-accent bg-surface/95 px-4 py-3 backdrop-blur">
           <div className="flex items-center justify-between">
             <p className="text-sm font-semibold">
               Niveau {level} · {rankTitle(level)}
@@ -311,7 +311,6 @@ export const ChoresModule = () => {
             </span>
           </p>
         </div>
-        </CatScene>
       </div>
 
       <div
