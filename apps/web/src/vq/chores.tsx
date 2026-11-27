@@ -3,14 +3,13 @@ import type { FormEvent } from "react";
 
 import {
   FREQUENCY_LABELS,
+  chorePeriodKey,
   defaultChores,
-  monthKeyOf,
+  formatDateTime,
   newId,
-  todayKey,
   useStoredState,
-  weekKeyOf,
 } from "./storage";
-import type { Chore, ChoreFrequency } from "./storage";
+import type { Chore, ChoreFrequency, ChoreHistoryEntry } from "./storage";
 
 const FREQUENCIES: ChoreFrequency[] = ["daily", "weekly", "monthly"];
 
@@ -20,18 +19,15 @@ const FREQUENCY_OPTIONS: { value: ChoreFrequency; label: string }[] = [
   { value: "monthly", label: "Mensuelle" },
 ];
 
-const periodKey = (frequency: ChoreFrequency): string =>
-  frequency === "daily"
-    ? todayKey()
-    : frequency === "weekly"
-      ? weekKeyOf()
-      : monthKeyOf(todayKey());
-
 export const ChoresModule = () => {
   const [chores, setChores] = useStoredState<Chore[]>(
     "vq.chores",
     [],
     defaultChores
+  );
+  const [history, setHistory] = useStoredState<ChoreHistoryEntry[]>(
+    "vq.choresHistory",
+    []
   );
   const [name, setName] = useState("");
   const [frequency, setFrequency] = useState<ChoreFrequency>("daily");
@@ -50,7 +46,8 @@ export const ChoresModule = () => {
   };
 
   const toggle = (chore: Chore) => {
-    const key = periodKey(chore.frequency);
+    const key = chorePeriodKey(chore.frequency);
+    const wasChecked = Boolean(chore.done[key]);
     setChores((previous) =>
       previous.map((entry) =>
         entry.id === chore.id
@@ -58,11 +55,40 @@ export const ChoresModule = () => {
           : entry
       )
     );
+    if (!wasChecked) {
+      setHistory((previous) => [
+        {
+          id: newId(),
+          choreId: chore.id,
+          choreName: chore.name,
+          frequency: chore.frequency,
+          period: key,
+          completedAt: new Date().toISOString(),
+        },
+        ...previous.filter(
+          (entry) => !(entry.choreId === chore.id && entry.period === key)
+        ),
+      ]);
+    }
+  };
+
+  const removeEntry = (id: string) => {
+    setHistory((previous) => previous.filter((entry) => entry.id !== id));
+  };
+
+  const clearHistory = () => {
+    if (window.confirm("Supprimer tout l'historique ?")) {
+      setHistory([]);
+    }
   };
 
   const remove = (id: string) => {
     setChores((previous) => previous.filter((chore) => chore.id !== id));
   };
+
+  const historyEntries = [...history].sort((a, b) =>
+    b.completedAt.localeCompare(a.completedAt)
+  );
 
   return (
     <section className="flex flex-col gap-4">
@@ -94,7 +120,9 @@ export const ChoresModule = () => {
 
       {FREQUENCIES.map((group) => {
         const groupChores = chores.filter((chore) => chore.frequency === group);
-        const doneCount = groupChores.filter((chore) => chore.done[periodKey(group)]).length;
+        const doneCount = groupChores.filter(
+          (chore) => chore.done[chorePeriodKey(group)]
+        ).length;
 
         return (
           <div key={group} className="flex flex-col gap-2">
@@ -108,7 +136,9 @@ export const ChoresModule = () => {
             </div>
             <ul className="flex flex-col gap-2">
               {groupChores.map((chore) => {
-                const checked = Boolean(chore.done[periodKey(chore.frequency)]);
+                const checked = Boolean(
+                  chore.done[chorePeriodKey(chore.frequency)]
+                );
                 return (
                   <li
                     key={chore.id}
@@ -119,7 +149,9 @@ export const ChoresModule = () => {
                       aria-label={checked ? "Invalider" : "Valider"}
                       onClick={() => toggle(chore)}
                       className={`flex size-6 shrink-0 items-center justify-center rounded-full border ${
-                        checked ? "border-accent bg-accent text-white" : "border-line"
+                        checked
+                          ? "border-accent bg-accent text-white"
+                          : "border-line"
                       }`}
                     >
                       {checked ? "✓" : ""}
@@ -151,6 +183,52 @@ export const ChoresModule = () => {
           </div>
         );
       })}
+
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between px-1">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">
+            Historique ({historyEntries.length})
+          </h2>
+          {historyEntries.length > 0 ? (
+            <button
+              type="button"
+              onClick={clearHistory}
+              className="text-xs font-medium text-red-500"
+            >
+              Tout supprimer
+            </button>
+          ) : null}
+        </div>
+        <ul className="flex flex-col gap-2">
+          {historyEntries.map((entry) => (
+            <li
+              key={entry.id}
+              className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-2.5"
+            >
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm">{entry.choreName}</p>
+                <p className="text-xs text-muted">
+                  {FREQUENCY_LABELS[entry.frequency].toLowerCase()} ·{" "}
+                  {formatDateTime(entry.completedAt)}
+                </p>
+              </div>
+              <button
+                type="button"
+                aria-label="Supprimer de l'historique"
+                onClick={() => removeEntry(entry.id)}
+                className="shrink-0 text-muted active:text-red-500"
+              >
+                ✕
+              </button>
+            </li>
+          ))}
+        </ul>
+        {historyEntries.length === 0 ? (
+          <p className="py-4 text-center text-sm text-muted">
+            Les tâches validées apparaîtront ici, sans limite de durée.
+          </p>
+        ) : null}
+      </div>
     </section>
   );
 };

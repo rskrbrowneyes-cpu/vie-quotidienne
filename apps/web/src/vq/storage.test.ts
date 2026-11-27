@@ -10,6 +10,7 @@ import {
   shiftDays,
   shiftMonth,
   todayKey,
+  chorePeriodKey,
   totalsByCategory,
   weekdayInitial,
   weekKeyOf,
@@ -84,6 +85,15 @@ describe("weekKeyOf", () => {
 
   it("puts the start of a year in the last ISO week of the previous year", () => {
     expect(weekKeyOf(new Date(2027, 0, 1))).toBe("2026-S53");
+  });
+});
+
+describe("chorePeriodKey", () => {
+  it("uses day, ISO week and month keys per frequency", () => {
+    const date = new Date(2026, 10, 27);
+    expect(chorePeriodKey("daily", date)).toBe("2026-11-27");
+    expect(chorePeriodKey("weekly", date)).toBe("2026-S48");
+    expect(chorePeriodKey("monthly", date)).toBe("2026-11");
   });
 });
 

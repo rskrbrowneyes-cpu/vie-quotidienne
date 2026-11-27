@@ -24,6 +24,15 @@ export type Chore = {
   done: Record<string, boolean>;
 };
 
+export type ChoreHistoryEntry = {
+  id: string;
+  choreId: string;
+  choreName: string;
+  frequency: ChoreFrequency;
+  period: string;
+  completedAt: string;
+};
+
 export type Expense = {
   id: string;
   amount: number;
@@ -135,6 +144,24 @@ export const currentStreak = (checks: Record<string, boolean>): number => {
 };
 
 export const monthKeyOf = (key: string): string => key.slice(0, 7);
+
+export const chorePeriodKey = (
+  frequency: ChoreFrequency,
+  date = new Date()
+): string =>
+  frequency === "daily"
+    ? dateKey(date)
+    : frequency === "weekly"
+      ? weekKeyOf(date)
+      : monthKeyOf(dateKey(date));
+
+export const formatDateTime = (iso: string): string =>
+  new Intl.DateTimeFormat("fr-FR", {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(iso));
 
 export const weekKeyOf = (date = new Date()): string => {
   const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
