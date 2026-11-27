@@ -1,5 +1,44 @@
 @import "tailwindcss";
 
+@theme inline {
+  --color-canvas: var(--vq-canvas);
+  --color-surface: var(--vq-surface);
+  --color-raised: var(--vq-raised);
+  --color-line: var(--vq-line);
+  --color-ink: var(--vq-ink);
+  --color-muted: var(--vq-muted);
+  --color-accent: var(--vq-accent);
+  --color-accent-soft: var(--vq-accent-soft);
+  --color-accent-ink: var(--vq-accent-ink);
+}
+
+:root {
+  color-scheme: light dark;
+  --vq-canvas: #fff9f2;
+  --vq-surface: #ffffff;
+  --vq-raised: #fff3e6;
+  --vq-line: #ecdfd0;
+  --vq-ink: #221d17;
+  --vq-muted: #8d8071;
+  --vq-accent: #ff7000;
+  --vq-accent-soft: #ffe9d6;
+  --vq-accent-ink: #b34c00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --vq-canvas: #151210;
+    --vq-surface: #201c19;
+    --vq-raised: #2a2521;
+    --vq-line: #3a332d;
+    --vq-ink: #f6f0e9;
+    --vq-muted: #a89d90;
+    --vq-accent: #ff8a33;
+    --vq-accent-soft: #402511;
+    --vq-accent-ink: #ffb066;
+  }
+}
+
 @layer base {
   html,
   body {
@@ -7,7 +46,7 @@
   }
 
   body {
-    @apply antialiased;
+    @apply antialiased bg-canvas text-ink;
   }
 }
 

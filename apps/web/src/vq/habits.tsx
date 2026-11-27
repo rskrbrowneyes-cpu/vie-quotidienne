@@ -58,11 +58,11 @@ export const HabitsModule = () => {
           value={name}
           onChange={(event) => setName(event.target.value)}
           placeholder="Nouvelle habitude…"
-          className="flex-1 rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-base outline-none placeholder:text-slate-500 focus:border-violet-500"
+          className="min-w-0 flex-1 rounded-xl border border-line bg-surface px-4 py-3 text-base outline-none placeholder:text-muted focus:border-accent"
         />
         <button
           type="submit"
-          className="rounded-xl bg-violet-600 px-5 py-3 text-base font-medium text-white active:bg-violet-700"
+          className="rounded-xl bg-accent px-4 py-3 text-base font-medium text-white active:opacity-80"
         >
           Ajouter
         </button>
@@ -72,19 +72,21 @@ export const HabitsModule = () => {
         {habits.map((habit) => (
           <li
             key={habit.id}
-            className="rounded-2xl border border-slate-800 bg-slate-900 p-4"
+            className="rounded-2xl border border-line bg-surface p-4"
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               <span className="text-xl">{habit.emoji}</span>
-              <span className="flex-1 text-base font-medium">{habit.name}</span>
-              <span className="text-sm text-amber-400">
+              <span className="min-w-0 flex-1 truncate text-base font-medium">
+                {habit.name}
+              </span>
+              <span className="shrink-0 text-sm text-accent-ink">
                 🔥 {currentStreak(habit.checks)}
               </span>
               <button
                 type="button"
                 aria-label="Supprimer"
                 onClick={() => remove(habit.id)}
-                className="text-slate-500 active:text-rose-400"
+                className="shrink-0 text-muted active:text-red-500"
               >
                 ✕
               </button>
@@ -98,15 +100,15 @@ export const HabitsModule = () => {
                     type="button"
                     onClick={() => toggle(habit.id, day)}
                     className={`flex flex-col items-center gap-1 rounded-lg py-2 ${
-                      checked ? "bg-violet-600/30" : "bg-slate-800/60"
+                      checked ? "bg-accent-soft" : "bg-raised"
                     }`}
                   >
-                    <span className="text-[10px] text-slate-400">
+                    <span className="text-[10px] text-muted">
                       {weekdayInitial(day)}
                     </span>
                     <span
                       className={`size-2.5 rounded-full ${
-                        checked ? "bg-violet-400" : "bg-slate-600"
+                        checked ? "bg-accent" : "bg-line"
                       }`}
                     />
                   </button>
@@ -118,7 +120,7 @@ export const HabitsModule = () => {
       </ul>
 
       {habits.length === 0 ? (
-        <p className="py-8 text-center text-sm text-slate-500">
+        <p className="py-8 text-center text-sm text-muted">
           Ajoutez une première habitude à suivre chaque jour.
         </p>
       ) : null}

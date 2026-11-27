@@ -55,17 +55,17 @@ export const TasksModule = () => {
           value={text}
           onChange={(event) => setText(event.target.value)}
           placeholder="Nouvelle tâche…"
-          className="flex-1 rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-base outline-none placeholder:text-slate-500 focus:border-emerald-500"
+          className="min-w-0 flex-1 rounded-xl border border-line bg-surface px-4 py-3 text-base outline-none placeholder:text-muted focus:border-accent"
         />
         <button
           type="submit"
-          className="rounded-xl bg-emerald-600 px-5 py-3 text-base font-medium text-white active:bg-emerald-700"
+          className="rounded-xl bg-accent px-4 py-3 text-base font-medium text-white active:opacity-80"
         >
           Ajouter
         </button>
       </form>
 
-      <div className="flex gap-2">
+      <div className="flex items-center gap-1.5">
         {FILTERS.map((entry) => (
           <button
             key={entry.id}
@@ -73,39 +73,35 @@ export const TasksModule = () => {
             onClick={() => setFilter(entry.id)}
             className={`rounded-full px-3 py-1.5 text-sm ${
               filter === entry.id
-                ? "bg-emerald-600/20 text-emerald-300"
-                : "text-slate-400"
+                ? "bg-accent-soft font-medium text-accent-ink"
+                : "text-muted"
             }`}
           >
             {entry.label}
           </button>
         ))}
-        <span className="ml-auto self-center text-sm text-slate-500">
-          {remaining} à faire
-        </span>
+        <span className="ml-auto text-sm text-muted">{remaining} à faire</span>
       </div>
 
       <ul className="flex flex-col gap-2">
         {visible.map((task) => (
           <li
             key={task.id}
-            className="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-900 px-4 py-3"
+            className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3"
           >
             <button
               type="button"
               aria-label={task.done ? "Marquer à faire" : "Marquer terminée"}
               onClick={() => toggle(task.id)}
               className={`flex size-6 shrink-0 items-center justify-center rounded-full border ${
-                task.done
-                  ? "border-emerald-500 bg-emerald-500 text-white"
-                  : "border-slate-600"
+                task.done ? "border-accent bg-accent text-white" : "border-line"
               }`}
             >
               {task.done ? "✓" : ""}
             </button>
             <span
-              className={`flex-1 text-base ${
-                task.done ? "text-slate-500 line-through" : ""
+              className={`min-w-0 flex-1 text-base ${
+                task.done ? "text-muted line-through" : ""
               }`}
             >
               {task.text}
@@ -114,7 +110,7 @@ export const TasksModule = () => {
               type="button"
               aria-label="Supprimer"
               onClick={() => remove(task.id)}
-              className="text-slate-500 active:text-rose-400"
+              className="text-muted active:text-red-500"
             >
               ✕
             </button>
@@ -123,7 +119,7 @@ export const TasksModule = () => {
       </ul>
 
       {visible.length === 0 ? (
-        <p className="py-8 text-center text-sm text-slate-500">
+        <p className="py-8 text-center text-sm text-muted">
           {filter === "active"
             ? "Rien à faire. Profitez-en !"
             : "Aucune tâche ici."}
