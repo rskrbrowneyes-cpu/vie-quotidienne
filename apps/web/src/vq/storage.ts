@@ -30,12 +30,19 @@ export type Habit = {
   checks: Record<string, boolean>;
 };
 
-export type ChoreFrequency = "daily" | "weekly" | "monthly";
+export type ChoreFrequency =
+  | "daily"
+  | "weekly"
+  | "monthly"
+  | "quarterly"
+  | "spring"
+  | "autumn";
 
 export type Chore = {
   id: string;
   name: string;
   frequency: ChoreFrequency;
+  section?: string;
   done: Record<string, boolean>;
 };
 
@@ -86,21 +93,82 @@ export const FREQUENCY_LABELS: Record<ChoreFrequency, string> = {
   daily: "Quotidiennes",
   weekly: "Hebdomadaires",
   monthly: "Mensuelles",
+  quarterly: "Trimestrielles",
+  spring: "Printemps",
+  autumn: "Automne",
 };
 
+export const FREQUENCY_SINGULAR: Record<ChoreFrequency, string> = {
+  daily: "quotidienne",
+  weekly: "hebdomadaire",
+  monthly: "mensuelle",
+  quarterly: "trimestrielle",
+  spring: "printemps",
+  autumn: "automne",
+};
+
+export const LEGACY_CHORE_NAMES = new Set([
+  "Faire les lits",
+  "Vaisselle & plan de travail",
+  "10 minutes de rangement",
+  "Surfaces & poubelles cuisine",
+  "Aspirateur & sols",
+  "Salle de bain & toilettes",
+  "Lessive",
+  "Changement des draps",
+  "Courses & placards",
+  "Frigo & congélateur",
+  "Dépoussiérage complet",
+  "Vitres & miroirs",
+]);
+
 export const DEFAULT_CHORES: Omit<Chore, "id" | "done">[] = [
-  { name: "Faire les lits", frequency: "daily" },
-  { name: "Vaisselle & plan de travail", frequency: "daily" },
-  { name: "10 minutes de rangement", frequency: "daily" },
-  { name: "Surfaces & poubelles cuisine", frequency: "daily" },
-  { name: "Aspirateur & sols", frequency: "weekly" },
-  { name: "Salle de bain & toilettes", frequency: "weekly" },
-  { name: "Lessive", frequency: "weekly" },
-  { name: "Changement des draps", frequency: "weekly" },
-  { name: "Courses & placards", frequency: "weekly" },
-  { name: "Frigo & congélateur", frequency: "monthly" },
-  { name: "Dépoussiérage complet", frequency: "monthly" },
-  { name: "Vitres & miroirs", frequency: "monthly" },
+  { name: "Lancer le robot aspirateur (pièce de vie / cuisine)", frequency: "daily" },
+  { name: "Litière : déjections et nettoyage autour du bac", frequency: "daily" },
+  { name: "Plan de travail, vaisselle, poubelles si pleines", frequency: "daily" },
+  { name: "Rangement express (mezzanine, escalier, couloir/buanderie)", frequency: "daily" },
+
+  { name: "Dépoussiérer les surfaces accessibles de la pièce de vie", frequency: "weekly", section: "Session A · pièce de vie, cuisine et sols (45 min)" },
+  { name: "Nettoyer façades de meubles et poignées d'électroménager", frequency: "weekly", section: "Session A · pièce de vie, cuisine et sols (45 min)" },
+  { name: "Essuyer la table et les assises", frequency: "weekly", section: "Session A · pièce de vie, cuisine et sols (45 min)" },
+  { name: "Nettoyer évier, robinetterie et plaques de cuisson", frequency: "weekly", section: "Session A · pièce de vie, cuisine et sols (45 min)" },
+  { name: "Aspirer hors de portée du robot (coins, tapis, panier du chat)", frequency: "weekly", section: "Session A · pièce de vie, cuisine et sols (45 min)" },
+  { name: "Laver le sol de la cuisine et des zones de passage", frequency: "weekly", section: "Session A · pièce de vie, cuisine et sols (45 min)" },
+
+  { name: "Salle de bain (lavabo, robinetterie, douche/baignoire, miroir)", frequency: "weekly", section: "Session B · sanitaires, buanderie et étage (45 min)" },
+  { name: "WC séparés (cuvette, abattant, chasse d'eau)", frequency: "weekly", section: "Session B · sanitaires, buanderie et étage (45 min)" },
+  { name: "Sols salle de bain, WC et couloir/buanderie", frequency: "weekly", section: "Session B · sanitaires, buanderie et étage (45 min)" },
+  { name: "Dépoussiérer le couloir/buanderie (dessus des machines, produits)", frequency: "weekly", section: "Session B · sanitaires, buanderie et étage (45 min)" },
+  { name: "Rampe et garde-corps de l'escalier et de la mezzanine", frequency: "weekly", section: "Session B · sanitaires, buanderie et étage (45 min)" },
+  { name: "Aspirer escalier, mezzanine et chambre à l'étage", frequency: "weekly", section: "Session B · sanitaires, buanderie et étage (45 min)" },
+  { name: "Aérer/changer le linge de lit et les serviettes", frequency: "weekly", section: "Session B · sanitaires, buanderie et étage (45 min)" },
+
+  { name: "Lancer 1 à 2 lessives (vêtements, maison, textiles du chat)", frequency: "weekly", section: "Linge · au fil de la semaine" },
+  { name: "Étendre, plier et ranger le linge sec", frequency: "weekly", section: "Linge · au fil de la semaine" },
+
+  { name: "Grand dégraissage cuisine (hotte, filtres, crédence)", frequency: "monthly" },
+  { name: "Intérieur du four et du micro-ondes", frequency: "monthly" },
+  { name: "Trier et nettoyer les clayettes du réfrigérateur", frequency: "monthly" },
+  { name: "Litière : vider, laver et désinfecter le bac", frequency: "monthly" },
+  { name: "Plinthes, interrupteurs, poignées, zones hautes", frequency: "monthly" },
+  { name: "Détartrer robinetterie et pommeau de douche", frequency: "monthly" },
+  { name: "Entretenir le robot (bac, brosses, capteurs)", frequency: "monthly" },
+
+  { name: "Vitres accessibles et rebords (pièce de vie, chambre, mezzanine)", frequency: "quarterly" },
+  { name: "Plaids, housses, rideaux légers et couchage du chat", frequency: "quarterly" },
+  { name: "Joint de hublot et bac à lessive du lave-linge", frequency: "quarterly" },
+  { name: "Détartrer le petit électroménager (cafetière, bouilloire, grille-pain)", frequency: "quarterly" },
+  { name: "Sous le lit et aérer/retourner le matelas", frequency: "quarterly" },
+
+  { name: "Terrasse : nettoyer le sol et essuyer le mobilier", frequency: "spring" },
+  { name: "Buissons : taille légère et débris végétaux", frequency: "spring" },
+  { name: "Grilles d'aération/VMC et dessus des meubles hauts", frequency: "spring" },
+  { name: "Trier et réorganiser les placards (buanderie, chambre)", frequency: "spring" },
+
+  { name: "Feuilles mortes, terrasse et buissons", frequency: "autumn" },
+  { name: "Évacuation des eaux de pluie et protection contre le gel", frequency: "autumn" },
+  { name: "Grilles VMC et plinthes sur tout le duplex", frequency: "autumn" },
+  { name: "Point linge et rangements avant l'hiver", frequency: "autumn" },
 ];
 
 export const defaultChores = (): Chore[] =>
@@ -163,12 +231,22 @@ export const monthKeyOf = (key: string): string => key.slice(0, 7);
 export const chorePeriodKey = (
   frequency: ChoreFrequency,
   date = new Date()
-): string =>
-  frequency === "daily"
-    ? dateKey(date)
-    : frequency === "weekly"
-      ? weekKeyOf(date)
-      : monthKeyOf(dateKey(date));
+): string => {
+  switch (frequency) {
+    case "daily":
+      return dateKey(date);
+    case "weekly":
+      return weekKeyOf(date);
+    case "monthly":
+      return monthKeyOf(dateKey(date));
+    case "quarterly":
+      return `${date.getFullYear()}-T${Math.floor(date.getMonth() / 3) + 1}`;
+    case "spring":
+      return `${date.getFullYear()}-printemps`;
+    case "autumn":
+      return `${date.getFullYear()}-automne`;
+  }
+};
 
 export const formatDateTime = (iso: string): string =>
   new Intl.DateTimeFormat("fr-FR", {
@@ -402,5 +480,5 @@ export const useStoredState = <T,>(key: string, initial: T, seed?: () => T) => {
     }
   }, [key, loaded, state]);
 
-  return [state, setState] as const;
+  return [state, setState, loaded] as const;
 };

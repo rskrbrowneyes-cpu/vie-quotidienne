@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 
 import {
   FREQUENCY_LABELS,
+  FREQUENCY_SINGULAR,
+  LEGACY_CHORE_NAMES,
   chorePeriodKey,
   dailyCompletionRate,
   defaultChores,
@@ -15,16 +17,41 @@ import {
 import type { Chore, ChoreFrequency, ChoreHistoryEntry } from "./storage";
 import { SwipeToDelete } from "./swipe";
 
-const FREQUENCIES: ChoreFrequency[] = ["daily", "weekly", "monthly"];
+const FREQUENCIES: ChoreFrequency[] = [
+  "daily",
+  "weekly",
+  "monthly",
+  "quarterly",
+  "spring",
+  "autumn",
+];
 
 const FREQUENCY_OPTIONS: { value: ChoreFrequency; label: string }[] = [
   { value: "daily", label: "Quotidienne" },
   { value: "weekly", label: "Hebdomadaire" },
   { value: "monthly", label: "Mensuelle" },
+  { value: "quarterly", label: "Trimestrielle" },
+  { value: "spring", label: "Printemps" },
+  { value: "autumn", label: "Automne" },
 ];
 
+const sectionsOf = (chores: readonly Chore[]) => {
+  const sections: { title: string | undefined; chores: Chore[] }[] = [];
+
+  for (const chore of chores) {
+    const last = sections[sections.length - 1];
+    if (last && last.title === chore.section) {
+      last.chores.push(chore);
+    } else {
+      sections.push({ title: chore.section, chores: [chore] });
+    }
+  }
+
+  return sections;
+};
+
 export const ChoresModule = () => {
-  const [chores, setChores] = useStoredState<Chore[]>(
+  const [chores, setChores, choresLoaded] = useStoredState<Chore[]>(
     "vq.chores",
     [],
     defaultChores
@@ -35,6 +62,16 @@ export const ChoresModule = () => {
   );
   const [name, setName] = useState("");
   const [frequency, setFrequency] = useState<ChoreFrequency>("daily");
+
+  useEffect(() => {
+    if (
+      choresLoaded &&
+      chores.length > 0 &&
+      chores.every((chore) => LEGACY_CHORE_NAMES.has(chore.name))
+    ) {
+      setChores(defaultChores());
+    }
+  }, [choresLoaded, chores, setChores]);
 
   const rate = dailyCompletionRate(chores);
   const forgotten = leastCompletedDaily(chores);
@@ -109,7 +146,7 @@ export const ChoresModule = () => {
           <div className="h-2 overflow-hidden rounded-full bg-raised">
             <div
               className="h-full rounded-full bg-accent"
-              style={{ width: `${rate} %` }}
+              style={{ width: `${rate}%` }}
             />
           </div>
           {forgotten !== null && forgotten.count < 28 ? (
@@ -155,6 +192,7 @@ export const ChoresModule = () => {
         const doneCount = groupChores.filter(
           (chore) => chore.done[chorePeriodKey(group)]
         ).length;
+        const sections = sectionsOf(groupChores);
 
         return (
           <div key={group} className="flex flex-col gap-2">
@@ -166,54 +204,77 @@ export const ChoresModule = () => {
                 {doneCount}/{groupChores.length}
               </span>
             </div>
-            <ul className="flex flex-col gap-2">
-              {groupChores.map((chore) => {
-                const checked = Boolean(
-                  chore.done[chorePeriodKey(chore.frequency)]
-                );
-                return (
-                  <SwipeToDelete
-                    key={chore.id}
-                    onDelete={() => remove(chore.id)}
-                  >
-                    <div className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3">
-                      <button
-                        type="button"
-                        aria-label={checked ? "Invalider" : "Valider"}
-                        onClick={() => toggle(chore)}
-                        className={`flex size-6 shrink-0 items-center justify-center rounded-full border ${
-                          checked
-                            ? "border-accent bg-accent text-white"
-                            : "border-line"
-                        }`}
-                      >
-                        {checked ? "✓" : ""}
-                      </button>
-                      <span
-                        className={`min-w-0 flex-1 text-base ${
-                          checked ? "text-muted line-through" : ""
-                        }`}
-                      >
-                        {chore.name}
+            {sections.map((section, sectionIndex) => {
+              const sectionDone = section.chores.filter(
+                (chore) => chore.done[chorePeriodKey(chore.frequency)]
+              ).length;
+
+              return (
+                <div
+                  key={section.title ?? `section-${sectionIndex}`}
+                  className="flex flex-col gap-2"
+                >
+                  {section.title !== undefined ? (
+                    <div className="flex items-baseline justify-between px-1">
+                      <p className="text-xs font-medium text-accent-ink">
+                        {section.title}
+                      </p>
+                      <span className="text-xs text-muted">
+                        {sectionDone}/{section.chores.length}
                       </span>
-                      <button
-                        type="button"
-                        aria-label="Supprimer"
-                        onClick={() => remove(chore.id)}
-                        className="shrink-0 text-muted active:text-red-500"
-                      >
-                        ✕
-                      </button>
                     </div>
-                  </SwipeToDelete>
-                );
-              })}
-              {groupChores.length === 0 ? (
-                <li className="rounded-xl border border-dashed border-line px-4 py-3 text-center text-sm text-muted">
-                  Aucune tâche {FREQUENCY_LABELS[group].toLowerCase()}.
-                </li>
-              ) : null}
-            </ul>
+                  ) : null}
+                  <ul className="flex flex-col gap-2">
+                    {section.chores.map((chore) => {
+                      const checked = Boolean(
+                        chore.done[chorePeriodKey(chore.frequency)]
+                      );
+                      return (
+                        <SwipeToDelete
+                          key={chore.id}
+                          onDelete={() => remove(chore.id)}
+                        >
+                          <div className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3">
+                            <button
+                              type="button"
+                              aria-label={checked ? "Invalider" : "Valider"}
+                              onClick={() => toggle(chore)}
+                              className={`flex size-6 shrink-0 items-center justify-center rounded-full border ${
+                                checked
+                                  ? "border-accent bg-accent text-white"
+                                  : "border-line"
+                              }`}
+                            >
+                              {checked ? "✓" : ""}
+                            </button>
+                            <span
+                              className={`min-w-0 flex-1 text-base ${
+                                checked ? "text-muted line-through" : ""
+                              }`}
+                            >
+                              {chore.name}
+                            </span>
+                            <button
+                              type="button"
+                              aria-label="Supprimer"
+                              onClick={() => remove(chore.id)}
+                              className="shrink-0 text-muted active:text-red-500"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </SwipeToDelete>
+                      );
+                    })}
+                  </ul>
+                </div>
+              );
+            })}
+            {groupChores.length === 0 ? (
+              <p className="rounded-xl border border-dashed border-line px-4 py-3 text-center text-sm text-muted">
+                Aucune tâche {FREQUENCY_SINGULAR[group]}.
+              </p>
+            ) : null}
           </div>
         );
       })}
@@ -243,7 +304,7 @@ export const ChoresModule = () => {
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm">{entry.choreName}</p>
                   <p className="text-xs text-muted">
-                    {FREQUENCY_LABELS[entry.frequency].toLowerCase()} ·{" "}
+                    {FREQUENCY_SINGULAR[entry.frequency]} ·{" "}
                     {formatDateTime(entry.completedAt)}
                   </p>
                 </div>

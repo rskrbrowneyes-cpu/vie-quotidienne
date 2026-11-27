@@ -99,6 +99,9 @@ describe("chorePeriodKey", () => {
     expect(chorePeriodKey("daily", date)).toBe("2026-11-27");
     expect(chorePeriodKey("weekly", date)).toBe("2026-S48");
     expect(chorePeriodKey("monthly", date)).toBe("2026-11");
+    expect(chorePeriodKey("quarterly", date)).toBe("2026-T4");
+    expect(chorePeriodKey("spring", date)).toBe("2026-printemps");
+    expect(chorePeriodKey("autumn", date)).toBe("2026-automne");
   });
 });
 
