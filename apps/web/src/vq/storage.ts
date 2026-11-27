@@ -5,7 +5,22 @@ export type Task = {
   text: string;
   done: boolean;
   createdAt: string;
+  pinned?: boolean;
 };
+
+export type ReminderSettings = {
+  enabled: boolean;
+  time: string;
+};
+
+export const STORAGE_KEYS = {
+  tasks: "vq.tasks",
+  habits: "vq.habits",
+  chores: "vq.chores",
+  choresHistory: "vq.choresHistory",
+  expenses: "vq.expenses",
+  firstOpened: "vq.firstOpened",
+} as const;
 
 export type Habit = {
   id: string;
@@ -125,7 +140,7 @@ export const lastNDays = (count: number, end = todayKey()): string[] =>
   );
 
 export const weekdayInitial = (key: string): string =>
-  WEEKDAY_INITIALS[parseDateKey(key).getDay()];
+  WEEKDAY_INITIALS[parseDateKey(key).getDay()] ?? "?";
 
 export const currentStreak = (checks: Record<string, boolean>): number => {
   let streak = 0;
@@ -162,6 +177,140 @@ export const formatDateTime = (iso: string): string =>
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(iso));
+
+export const formatDateLong = (iso: string): string =>
+  new Intl.DateTimeFormat("fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(iso));
+
+export const monthShortLabel = (monthKey: string): string => {
+  const month = Number(monthKey.split("-")[1]);
+  const name = MONTHS[month - 1] ?? "janvier";
+  return name.length <= 4 ? name : `${name.slice(0, 4)}.`;
+};
+
+export const bestStreak = (checks: Record<string, boolean>): number => {
+  const keys = Object.keys(checks)
+    .filter((key) => checks[key])
+    .sort();
+  let best = 0;
+  let run = 0;
+  let previous = "";
+
+  for (const key of keys) {
+    run = previous !== "" && shiftDays(previous, 1) === key ? run + 1 : 1;
+    if (run > best) {
+      best = run;
+    }
+    previous = key;
+  }
+
+  return best;
+};
+
+export const dailyCompletionRate = (
+  chores: readonly Chore[],
+  endDate = new Date(),
+  days = 7
+): number | null => {
+  const daily = chores.filter((chore) => chore.frequency === "daily");
+
+  if (daily.length === 0) {
+    return null;
+  }
+
+  let done = 0;
+
+  for (let offset = 0; offset < days; offset += 1) {
+    const key = dateKey(
+      new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate() - offset)
+    );
+    done += daily.filter((chore) => chore.done[key]).length;
+  }
+
+  return Math.round((done / (daily.length * days)) * 100);
+};
+
+export const leastCompletedDaily = (
+  chores: readonly Chore[],
+  endDate = new Date(),
+  days = 28
+): { name: string; count: number } | null => {
+  const daily = chores.filter((chore) => chore.frequency === "daily");
+
+  if (daily.length === 0) {
+    return null;
+  }
+
+  const keys = Array.from({ length: days }, (_, offset) =>
+    dateKey(
+      new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate() - offset)
+    )
+  );
+  let result: { name: string; count: number } | null = null;
+
+  for (const chore of daily) {
+    const count = keys.filter((key) => chore.done[key]).length;
+
+    if (result === null || count < result.count) {
+      result = { name: chore.name, count };
+    }
+  }
+
+  return result;
+};
+
+export const monthValidationCount = (
+  history: readonly ChoreHistoryEntry[],
+  date = new Date()
+): number =>
+  history.filter(
+    (entry) => entry.completedAt.slice(0, 7) === monthKeyOf(dateKey(date))
+  ).length;
+
+export const exportPayload = (): string => {
+  const data: Record<string, unknown> = {
+    app: "vie-quotidienne",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+  };
+
+  for (const key of Object.values(STORAGE_KEYS)) {
+    data[key] = JSON.parse(window.localStorage.getItem(key) ?? "null");
+  }
+
+  return JSON.stringify(data, null, 2);
+};
+
+export const applyImport = (raw: string): boolean => {
+  try {
+    const data = JSON.parse(raw) as Record<string, unknown>;
+
+    if (data.app !== "vie-quotidienne" || data.version !== 1) {
+      return false;
+    }
+
+    for (const [name, storageKey] of Object.entries(STORAGE_KEYS)) {
+      const value = data[name];
+
+      if (value === undefined || value === null) {
+        continue;
+      }
+
+      if (name !== "firstOpened" && !Array.isArray(value)) {
+        return false;
+      }
+
+      window.localStorage.setItem(storageKey, JSON.stringify(value));
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
+};
 
 export const weekKeyOf = (date = new Date()): string => {
   const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());

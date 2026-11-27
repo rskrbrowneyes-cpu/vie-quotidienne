@@ -4,12 +4,16 @@ import type { FormEvent } from "react";
 import {
   FREQUENCY_LABELS,
   chorePeriodKey,
+  dailyCompletionRate,
   defaultChores,
   formatDateTime,
+  leastCompletedDaily,
+  monthValidationCount,
   newId,
   useStoredState,
 } from "./storage";
 import type { Chore, ChoreFrequency, ChoreHistoryEntry } from "./storage";
+import { SwipeToDelete } from "./swipe";
 
 const FREQUENCIES: ChoreFrequency[] = ["daily", "weekly", "monthly"];
 
@@ -31,6 +35,10 @@ export const ChoresModule = () => {
   );
   const [name, setName] = useState("");
   const [frequency, setFrequency] = useState<ChoreFrequency>("daily");
+
+  const rate = dailyCompletionRate(chores);
+  const forgotten = leastCompletedDaily(chores);
+  const monthValidations = monthValidationCount(history);
 
   const add = (event: FormEvent) => {
     event.preventDefault();
@@ -92,6 +100,30 @@ export const ChoresModule = () => {
 
   return (
     <section className="flex flex-col gap-4">
+      {rate !== null ? (
+        <div className="flex flex-col gap-1.5 rounded-2xl border border-line bg-surface p-4 text-sm">
+          <div className="flex justify-between">
+            <span className="text-muted">Routine quotidienne · 7 jours</span>
+            <span className="font-semibold">{rate} %</span>
+          </div>
+          <div className="h-2 overflow-hidden rounded-full bg-raised">
+            <div
+              className="h-full rounded-full bg-accent"
+              style={{ width: `${rate} %` }}
+            />
+          </div>
+          {forgotten !== null && forgotten.count < 28 ? (
+            <p className="text-xs text-muted">
+              Souvent oubliée : {forgotten.name} ({forgotten.count}/28 jours)
+            </p>
+          ) : null}
+          <p className="text-xs text-muted">
+            Ce mois-ci : {monthValidations} validation
+            {monthValidations > 1 ? "s" : ""}
+          </p>
+        </div>
+      ) : null}
+
       <form onSubmit={add} className="grid grid-cols-2 gap-2">
         <input
           value={name}
@@ -140,38 +172,40 @@ export const ChoresModule = () => {
                   chore.done[chorePeriodKey(chore.frequency)]
                 );
                 return (
-                  <li
+                  <SwipeToDelete
                     key={chore.id}
-                    className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3"
+                    onDelete={() => remove(chore.id)}
                   >
-                    <button
-                      type="button"
-                      aria-label={checked ? "Invalider" : "Valider"}
-                      onClick={() => toggle(chore)}
-                      className={`flex size-6 shrink-0 items-center justify-center rounded-full border ${
-                        checked
-                          ? "border-accent bg-accent text-white"
-                          : "border-line"
-                      }`}
-                    >
-                      {checked ? "✓" : ""}
-                    </button>
-                    <span
-                      className={`min-w-0 flex-1 text-base ${
-                        checked ? "text-muted line-through" : ""
-                      }`}
-                    >
-                      {chore.name}
-                    </span>
-                    <button
-                      type="button"
-                      aria-label="Supprimer"
-                      onClick={() => remove(chore.id)}
-                      className="shrink-0 text-muted active:text-red-500"
-                    >
-                      ✕
-                    </button>
-                  </li>
+                    <div className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3">
+                      <button
+                        type="button"
+                        aria-label={checked ? "Invalider" : "Valider"}
+                        onClick={() => toggle(chore)}
+                        className={`flex size-6 shrink-0 items-center justify-center rounded-full border ${
+                          checked
+                            ? "border-accent bg-accent text-white"
+                            : "border-line"
+                        }`}
+                      >
+                        {checked ? "✓" : ""}
+                      </button>
+                      <span
+                        className={`min-w-0 flex-1 text-base ${
+                          checked ? "text-muted line-through" : ""
+                        }`}
+                      >
+                        {chore.name}
+                      </span>
+                      <button
+                        type="button"
+                        aria-label="Supprimer"
+                        onClick={() => remove(chore.id)}
+                        className="shrink-0 text-muted active:text-red-500"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </SwipeToDelete>
                 );
               })}
               {groupChores.length === 0 ? (
@@ -201,26 +235,28 @@ export const ChoresModule = () => {
         </div>
         <ul className="flex flex-col gap-2">
           {historyEntries.map((entry) => (
-            <li
+            <SwipeToDelete
               key={entry.id}
-              className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-2.5"
+              onDelete={() => removeEntry(entry.id)}
             >
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm">{entry.choreName}</p>
-                <p className="text-xs text-muted">
-                  {FREQUENCY_LABELS[entry.frequency].toLowerCase()} ·{" "}
-                  {formatDateTime(entry.completedAt)}
-                </p>
+              <div className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-2.5">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm">{entry.choreName}</p>
+                  <p className="text-xs text-muted">
+                    {FREQUENCY_LABELS[entry.frequency].toLowerCase()} ·{" "}
+                    {formatDateTime(entry.completedAt)}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  aria-label="Supprimer de l'historique"
+                  onClick={() => removeEntry(entry.id)}
+                  className="shrink-0 text-muted active:text-red-500"
+                >
+                  ✕
+                </button>
               </div>
-              <button
-                type="button"
-                aria-label="Supprimer de l'historique"
-                onClick={() => removeEntry(entry.id)}
-                className="shrink-0 text-muted active:text-red-500"
-              >
-                ✕
-              </button>
-            </li>
+            </SwipeToDelete>
           ))}
         </ul>
         {historyEntries.length === 0 ? (

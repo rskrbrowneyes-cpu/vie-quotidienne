@@ -1,10 +1,17 @@
 import { useEffect, useState } from "react";
 
-import { todayLabel, useStoredState } from "./storage";
+import {
+  STORAGE_KEYS,
+  todayKey,
+  todayLabel,
+  useStoredState,
+} from "./storage";
+import type { Chore, ReminderSettings, Task } from "./storage";
 import { BudgetModule } from "./budget";
 import { ChoresModule } from "./chores";
 import { HabitsModule } from "./habits";
 import { InstallButton } from "./install";
+import { SettingsPanel } from "./settings";
 import { TasksModule } from "./tasks";
 
 type TabId = "tasks" | "habits" | "chores" | "budget";
@@ -19,6 +26,17 @@ const TABS: { id: TabId; label: string; icon: string }[] = [
 export const App = () => {
   const [tab, setTab] = useStoredState<TabId>("vq.tab", "tasks");
   const [mounted, setMounted] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [eveningDismissed, setEveningDismissed] = useStoredState<string>(
+    "vq.eveningDismissed",
+    ""
+  );
+  const [reminder] = useStoredState<ReminderSettings>("vq.reminder", {
+    enabled: false,
+    time: "20:00",
+  });
+  const [tasks] = useStoredState<Task[]>(STORAGE_KEYS.tasks, []);
+  const [chores] = useStoredState<Chore[]>(STORAGE_KEYS.chores, []);
 
   useEffect(() => {
     setMounted(true);
@@ -26,6 +44,47 @@ export const App = () => {
       navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`);
     }
   }, []);
+
+  useEffect(() => {
+    if (!mounted || !reminder.enabled) {
+      return;
+    }
+
+    const check = () => {
+      if (!("Notification" in window) || Notification.permission !== "granted") {
+        return;
+      }
+      const now = new Date();
+      const [hours, minutes] = reminder.time.split(":").map(Number) as [
+        number,
+        number,
+      ];
+      if (now.getHours() * 60 + now.getMinutes() < hours * 60 + minutes) {
+        return;
+      }
+      const today = todayKey();
+      if (window.localStorage.getItem("vq.lastNotified") === today) {
+        return;
+      }
+      window.localStorage.setItem("vq.lastNotified", today);
+      new Notification("Vie quotidienne", {
+        body: "C'est l'heure de votre routine du soir.",
+      });
+    };
+
+    check();
+    const id = window.setInterval(check, 30_000);
+    return () => window.clearInterval(id);
+  }, [mounted, reminder]);
+
+  const pendingTasks = tasks.filter((task) => !task.done).length;
+  const pendingChores = chores.filter(
+    (chore) => chore.frequency === "daily" && !chore.done[todayKey()]
+  ).length;
+  const pending = pendingTasks + pendingChores;
+  const isEvening = mounted && new Date().getHours() >= 20;
+  const showEveningBanner =
+    isEvening && pending > 0 && eveningDismissed !== todayKey();
 
   return (
     <div className="flex min-h-dvh flex-col bg-canvas text-ink">
@@ -43,9 +102,44 @@ export const App = () => {
               {mounted ? todayLabel() : "\u00a0"}
             </p>
           </div>
-          <InstallButton />
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              aria-label="Réglages"
+              onClick={() => setShowSettings(true)}
+              className="flex size-9 items-center justify-center rounded-full border border-line text-base active:opacity-80"
+            >
+              ⚙
+            </button>
+            <InstallButton />
+          </div>
         </div>
       </header>
+
+      {showEveningBanner ? (
+        <div className="mx-auto w-full max-w-md px-4 pt-3">
+          <div className="flex items-center gap-3 rounded-xl border border-line bg-raised px-4 py-3">
+            <span className="text-lg" aria-hidden>
+              🌙
+            </span>
+            <p className="min-w-0 flex-1 text-sm">
+              Ce soir :{" "}
+              <span className="font-semibold">
+                {pending} tâche{pending > 1 ? "s" : ""}
+              </span>{" "}
+              en attente
+            </p>
+            <button
+              type="button"
+              aria-label="Masquer"
+              onClick={() => setEveningDismissed(todayKey())}
+              className="text-muted active:text-ink"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       <main className="mx-auto w-full max-w-md flex-1 px-4 pb-28 pt-4">
         {tab === "tasks" ? (
@@ -60,7 +154,7 @@ export const App = () => {
       </main>
 
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-canvas/95 backdrop-blur">
-        <div className="mx-auto grid w-full max-w-md grid-cols-3 pb-[env(safe-area-inset-bottom)]">
+        <div className="mx-auto grid w-full max-w-md grid-cols-4 pb-[env(safe-area-inset-bottom)]">
           {TABS.map((entry) => (
             <button
               key={entry.id}
@@ -76,6 +170,8 @@ export const App = () => {
           ))}
         </div>
       </nav>
+
+      {showSettings ? <SettingsPanel onClose={() => setShowSettings(false)} /> : null}
     </div>
   );
 };

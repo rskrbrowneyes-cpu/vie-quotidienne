@@ -1,4 +1,4 @@
-import type { RootScreens, RootTexts } from "./root-screens";
+import type { RootScreens, RootTexts } from "../root-screens";
 
 const texts: RootTexts = {
   lang: "fr",

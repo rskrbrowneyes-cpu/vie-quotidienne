@@ -10,12 +10,17 @@ import {
   shiftDays,
   shiftMonth,
   todayKey,
+  bestStreak,
   chorePeriodKey,
+  dailyCompletionRate,
+  leastCompletedDaily,
+  monthShortLabel,
+  monthValidationCount,
   totalsByCategory,
   weekdayInitial,
   weekKeyOf,
 } from "./storage";
-import type { Expense } from "./storage";
+import type { Chore, ChoreHistoryEntry, Expense } from "./storage";
 
 describe("dateKey", () => {
   it("pads month and day", () => {
@@ -94,6 +99,81 @@ describe("chorePeriodKey", () => {
     expect(chorePeriodKey("daily", date)).toBe("2026-11-27");
     expect(chorePeriodKey("weekly", date)).toBe("2026-S48");
     expect(chorePeriodKey("monthly", date)).toBe("2026-11");
+  });
+});
+
+describe("bestStreak", () => {
+  it("finds the longest consecutive run", () => {
+    expect(
+      bestStreak({
+        "2026-03-01": true,
+        "2026-03-02": true,
+        "2026-03-03": true,
+        "2026-03-07": true,
+        "2026-03-08": true,
+      })
+    ).toBe(3);
+  });
+
+  it("returns zero with no checks", () => {
+    expect(bestStreak({})).toBe(0);
+  });
+});
+
+describe("dailyCompletionRate", () => {
+  it("averages daily checks over the window", () => {
+    const chores: Chore[] = [
+      {
+        id: "1",
+        name: "A",
+        frequency: "daily",
+        done: { "2026-11-26": true, "2026-11-25": true },
+      },
+      { id: "2", name: "B", frequency: "daily", done: {} },
+    ];
+
+    expect(dailyCompletionRate(chores, new Date(2026, 10, 27), 3)).toBe(33);
+  });
+
+  it("returns null without daily chores", () => {
+    expect(dailyCompletionRate([], new Date(2026, 10, 27))).toBeNull();
+  });
+});
+
+describe("leastCompletedDaily", () => {
+  it("returns the daily chore with the fewest validations", () => {
+    const chores: Chore[] = [
+      {
+        id: "1",
+        name: "A",
+        frequency: "daily",
+        done: { "2026-11-27": true, "2026-11-26": true },
+      },
+      { id: "2", name: "B", frequency: "daily", done: { "2026-11-27": true } },
+    ];
+
+    expect(leastCompletedDaily(chores, new Date(2026, 10, 27), 2)).toEqual({
+      name: "B",
+      count: 1,
+    });
+  });
+});
+
+describe("monthValidationCount", () => {
+  it("counts history entries completed in the month", () => {
+    const history: ChoreHistoryEntry[] = [
+      { id: "1", choreId: "a", choreName: "A", frequency: "daily", period: "2026-11-27", completedAt: "2026-11-27T18:00:00.000Z" },
+      { id: "2", choreId: "b", choreName: "B", frequency: "daily", period: "2026-10-30", completedAt: "2026-10-30T18:00:00.000Z" },
+    ];
+
+    expect(monthValidationCount(history, new Date(2026, 10, 27))).toBe(1);
+  });
+});
+
+describe("monthShortLabel", () => {
+  it("abbreviates month names", () => {
+    expect(monthShortLabel("2026-01")).toBe("janv.");
+    expect(monthShortLabel("2026-08")).toBe("août");
   });
 });
 

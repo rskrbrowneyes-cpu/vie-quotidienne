@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 
 import { newId, useStoredState } from "./storage";
 import type { Task } from "./storage";
+import { SwipeToDelete } from "./swipe";
 
 type Filter = "active" | "all" | "done";
 
@@ -38,6 +39,14 @@ export const TasksModule = () => {
     );
   };
 
+  const togglePin = (id: string) => {
+    setTasks((previous) =>
+      previous.map((task) =>
+        task.id === id ? { ...task, pinned: !task.pinned } : task
+      )
+    );
+  };
+
   const remove = (id: string) => {
     setTasks((previous) => previous.filter((task) => task.id !== id));
   };
@@ -47,6 +56,9 @@ export const TasksModule = () => {
     filter === "all"
       ? tasks
       : tasks.filter((task) => (filter === "done" ? task.done : !task.done));
+  const sorted = [...visible].sort(
+    (a, b) => Number(b.pinned ?? false) - Number(a.pinned ?? false)
+  );
 
   return (
     <section className="flex flex-col gap-4">
@@ -84,41 +96,56 @@ export const TasksModule = () => {
       </div>
 
       <ul className="flex flex-col gap-2">
-        {visible.map((task) => (
-          <li
-            key={task.id}
-            className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3"
-          >
-            <button
-              type="button"
-              aria-label={task.done ? "Marquer à faire" : "Marquer terminée"}
-              onClick={() => toggle(task.id)}
-              className={`flex size-6 shrink-0 items-center justify-center rounded-full border ${
-                task.done ? "border-accent bg-accent text-white" : "border-line"
+        {sorted.map((task) => (
+          <SwipeToDelete key={task.id} onDelete={() => remove(task.id)}>
+            <div
+              className={`flex items-center gap-2.5 rounded-xl border bg-surface px-3.5 py-3 ${
+                task.pinned ? "border-accent" : "border-line"
               }`}
             >
-              {task.done ? "✓" : ""}
-            </button>
-            <span
-              className={`min-w-0 flex-1 text-base ${
-                task.done ? "text-muted line-through" : ""
-              }`}
-            >
-              {task.text}
-            </span>
-            <button
-              type="button"
-              aria-label="Supprimer"
-              onClick={() => remove(task.id)}
-              className="text-muted active:text-red-500"
-            >
-              ✕
-            </button>
-          </li>
+              <button
+                type="button"
+                aria-label={task.done ? "Marquer à faire" : "Marquer terminée"}
+                onClick={() => toggle(task.id)}
+                className={`flex size-6 shrink-0 items-center justify-center rounded-full border ${
+                  task.done
+                    ? "border-accent bg-accent text-white"
+                    : "border-line"
+                }`}
+              >
+                {task.done ? "✓" : ""}
+              </button>
+              <span
+                className={`min-w-0 flex-1 text-base ${
+                  task.done ? "text-muted line-through" : ""
+                }`}
+              >
+                {task.text}
+              </span>
+              <button
+                type="button"
+                aria-label={task.pinned ? "Désépingler" : "Épingler"}
+                onClick={() => togglePin(task.id)}
+                className={`shrink-0 text-sm ${
+                  task.pinned ? "text-accent" : "text-muted"
+                }`}
+              >
+                📌
+              </button>
+              <button
+                type="button"
+                aria-label="Supprimer"
+                onClick={() => remove(task.id)}
+                className="shrink-0 text-muted active:text-red-500"
+              >
+                ✕
+              </button>
+            </div>
+          </SwipeToDelete>
         ))}
       </ul>
 
-      {visible.length === 0 ? (
+      {sorted.length === 0 ? (
         <p className="py-8 text-center text-sm text-muted">
           {filter === "active"
             ? "Rien à faire. Profitez-en !"

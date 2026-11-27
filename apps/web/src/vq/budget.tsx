@@ -7,6 +7,7 @@ import {
   formatAmount,
   monthKeyOf,
   monthLabel,
+  monthShortLabel,
   newId,
   shiftMonth,
   sumExpenses,
@@ -15,6 +16,12 @@ import {
   useStoredState,
 } from "./storage";
 import type { Expense } from "./storage";
+import { SwipeToDelete } from "./swipe";
+
+const lastSixMonths = (): string[] =>
+  Array.from({ length: 6 }, (_, index) =>
+    shiftMonth(currentMonthKey(), index - 5)
+  );
 
 export const BudgetModule = () => {
   const [expenses, setExpenses] = useStoredState<Expense[]>("vq.expenses", []);
@@ -31,6 +38,20 @@ export const BudgetModule = () => {
   const byCategory = totalsByCategory(monthExpenses);
   const maxCategory = byCategory[0]?.total ?? 0;
 
+  const usage = CATEGORIES.map((entry) => ({
+    entry,
+    count: expenses.filter((expense) => expense.category === entry).length,
+  })).sort((a, b) => b.count - a.count);
+
+  const sixMonths = lastSixMonths();
+  const sixMonthTotals = sixMonths.map((monthKey) => ({
+    monthKey,
+    total: sumExpenses(
+      expenses.filter((expense) => monthKeyOf(expense.date) === monthKey)
+    ),
+  }));
+  const maxSixMonth = Math.max(...sixMonthTotals.map((entry) => entry.total), 1);
+
   const add = (event: FormEvent) => {
     event.preventDefault();
     const value = Number(amount.replace(",", "."));
@@ -43,6 +64,17 @@ export const BudgetModule = () => {
     ]);
     setAmount("");
     setNote("");
+  };
+
+  const duplicate = (expense: Expense) => {
+    setExpenses((previous) => [
+      ...previous,
+      {
+        ...expense,
+        id: newId(),
+        date: todayKey(),
+      },
+    ]);
   };
 
   const remove = (id: string) => {
@@ -74,43 +106,83 @@ export const BudgetModule = () => {
         </button>
       </div>
 
-      <form onSubmit={add} className="grid grid-cols-2 gap-2">
-        <input
-          value={amount}
-          onChange={(event) => setAmount(event.target.value)}
-          inputMode="decimal"
-          placeholder="Montant (€)"
-          className="rounded-xl border border-line bg-surface px-4 py-3 text-base outline-none placeholder:text-muted focus:border-accent"
-        />
-        <select
-          value={category}
-          onChange={(event) => setCategory(event.target.value)}
-          className="rounded-xl border border-line bg-surface px-3 py-3 text-base outline-none focus:border-accent"
-        >
-          {CATEGORIES.map((entry) => (
-            <option key={entry} value={entry}>
-              {entry}
-            </option>
+      <div className="rounded-2xl border border-line bg-surface p-4">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">
+          6 derniers mois
+        </h2>
+        <div className="mt-3 flex h-24 items-end gap-2">
+          {sixMonthTotals.map(({ monthKey, total: value }) => (
+            <div key={monthKey} className="flex flex-1 flex-col items-center gap-1">
+              <span className="text-[10px] text-muted">
+                {value > 0 ? Math.round(value) : ""}
+              </span>
+              <div
+                className={`w-full rounded-t-md ${
+                  monthKey === month ? "bg-accent" : "bg-accent/40"
+                }`}
+                style={{
+                  height: `${Math.max(
+                    3,
+                    Math.round((value / maxSixMonth) * 76)
+                  )}px`,
+                }}
+              />
+              <span
+                className={`text-[10px] ${
+                  monthKey === month ? "font-semibold text-accent-ink" : "text-muted"
+                }`}
+              >
+                {monthShortLabel(monthKey)}
+              </span>
+            </div>
           ))}
-        </select>
-        <input
-          value={note}
-          onChange={(event) => setNote(event.target.value)}
-          placeholder="Note (facultatif)"
-          className="col-span-2 rounded-xl border border-line bg-surface px-4 py-3 text-base outline-none placeholder:text-muted focus:border-accent"
-        />
-        <input
-          type="date"
-          value={date}
-          onChange={(event) => setDate(event.target.value)}
-          className="rounded-xl border border-line bg-surface px-3 py-3 text-base outline-none focus:border-accent"
-        />
-        <button
-          type="submit"
-          className="rounded-xl bg-accent py-3 text-base font-medium text-white active:opacity-80"
-        >
-          Ajouter
-        </button>
+        </div>
+      </div>
+
+      <form onSubmit={add} className="flex flex-col gap-2">
+        <div className="flex flex-wrap gap-1.5">
+          {usage.map(({ entry }) => (
+            <button
+              key={entry}
+              type="button"
+              onClick={() => setCategory(entry)}
+              className={`rounded-full border px-3 py-1.5 text-sm ${
+                category === entry
+                  ? "border-accent bg-accent-soft font-medium text-accent-ink"
+                  : "border-line text-muted"
+              }`}
+            >
+              {entry}
+            </button>
+          ))}
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <input
+            value={amount}
+            onChange={(event) => setAmount(event.target.value)}
+            inputMode="decimal"
+            placeholder="Montant (€)"
+            className="rounded-xl border border-line bg-surface px-4 py-3 text-base outline-none placeholder:text-muted focus:border-accent"
+          />
+          <input
+            type="date"
+            value={date}
+            onChange={(event) => setDate(event.target.value)}
+            className="rounded-xl border border-line bg-surface px-3 py-3 text-base outline-none focus:border-accent"
+          />
+          <input
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+            placeholder="Note (facultatif)"
+            className="col-span-2 rounded-xl border border-line bg-surface px-4 py-3 text-base outline-none placeholder:text-muted focus:border-accent"
+          />
+          <button
+            type="submit"
+            className="col-span-2 rounded-xl bg-accent py-3 text-base font-medium text-white active:opacity-80"
+          >
+            Ajouter la dépense
+          </button>
+        </div>
       </form>
 
       {byCategory.length > 0 ? (
@@ -139,30 +211,37 @@ export const BudgetModule = () => {
 
       <ul className="flex flex-col gap-2">
         {monthExpenses.map((expense) => (
-          <li
-            key={expense.id}
-            className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3"
-          >
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-base">
-                {expense.note === "" ? expense.category : expense.note}
-              </p>
-              <p className="text-xs text-muted">
-                {expense.category} · {expense.date}
-              </p>
+          <SwipeToDelete key={expense.id} onDelete={() => remove(expense.id)}>
+            <div className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-base">
+                  {expense.note === "" ? expense.category : expense.note}
+                </p>
+                <p className="text-xs text-muted">
+                  {expense.category} · {expense.date}
+                </p>
+              </div>
+              <span className="shrink-0 text-base font-medium">
+                {formatAmount(expense.amount)}
+              </span>
+              <button
+                type="button"
+                aria-label="Dupliquer aujourd'hui"
+                onClick={() => duplicate(expense)}
+                className="shrink-0 text-muted active:text-ink"
+              >
+                ⧉
+              </button>
+              <button
+                type="button"
+                aria-label="Supprimer"
+                onClick={() => remove(expense.id)}
+                className="shrink-0 text-muted active:text-red-500"
+              >
+                ✕
+              </button>
             </div>
-            <span className="shrink-0 text-base font-medium">
-              {formatAmount(expense.amount)}
-            </span>
-            <button
-              type="button"
-              aria-label="Supprimer"
-              onClick={() => remove(expense.id)}
-              className="shrink-0 text-muted active:text-red-500"
-            >
-              ✕
-            </button>
-          </li>
+          </SwipeToDelete>
         ))}
       </ul>
 
