@@ -12,6 +12,7 @@ import {
   todayKey,
   totalsByCategory,
   weekdayInitial,
+  weekKeyOf,
 } from "./storage";
 import type { Expense } from "./storage";
 
@@ -72,6 +73,17 @@ describe("currentStreak", () => {
     expect(
       currentStreak({ [shiftDays(today, -2)]: true })
     ).toBe(0);
+  });
+});
+
+describe("weekKeyOf", () => {
+  it("numbers ISO weeks within a year", () => {
+    expect(weekKeyOf(new Date(2026, 0, 1))).toBe("2026-S01");
+    expect(weekKeyOf(new Date(2026, 10, 27))).toBe("2026-S48");
+  });
+
+  it("puts the start of a year in the last ISO week of the previous year", () => {
+    expect(weekKeyOf(new Date(2027, 0, 1))).toBe("2026-S53");
   });
 });
 

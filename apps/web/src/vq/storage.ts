@@ -15,6 +15,15 @@ export type Habit = {
   checks: Record<string, boolean>;
 };
 
+export type ChoreFrequency = "daily" | "weekly" | "monthly";
+
+export type Chore = {
+  id: string;
+  name: string;
+  frequency: ChoreFrequency;
+  done: Record<string, boolean>;
+};
+
 export type Expense = {
   id: string;
   amount: number;
@@ -48,6 +57,34 @@ export const MONTHS = [
 ] as const;
 
 export const WEEKDAY_INITIALS = ["D", "L", "M", "M", "J", "V", "S"] as const;
+
+export const FREQUENCY_LABELS: Record<ChoreFrequency, string> = {
+  daily: "Quotidiennes",
+  weekly: "Hebdomadaires",
+  monthly: "Mensuelles",
+};
+
+export const DEFAULT_CHORES: Omit<Chore, "id" | "done">[] = [
+  { name: "Faire les lits", frequency: "daily" },
+  { name: "Vaisselle & plan de travail", frequency: "daily" },
+  { name: "10 minutes de rangement", frequency: "daily" },
+  { name: "Surfaces & poubelles cuisine", frequency: "daily" },
+  { name: "Aspirateur & sols", frequency: "weekly" },
+  { name: "Salle de bain & toilettes", frequency: "weekly" },
+  { name: "Lessive", frequency: "weekly" },
+  { name: "Changement des draps", frequency: "weekly" },
+  { name: "Courses & placards", frequency: "weekly" },
+  { name: "Frigo & congélateur", frequency: "monthly" },
+  { name: "Dépoussiérage complet", frequency: "monthly" },
+  { name: "Vitres & miroirs", frequency: "monthly" },
+];
+
+export const defaultChores = (): Chore[] =>
+  DEFAULT_CHORES.map((chore) => ({
+    ...chore,
+    id: newId(),
+    done: {},
+  }));
 
 export const dateKey = (date: Date): string =>
   [
@@ -99,6 +136,21 @@ export const currentStreak = (checks: Record<string, boolean>): number => {
 
 export const monthKeyOf = (key: string): string => key.slice(0, 7);
 
+export const weekKeyOf = (date = new Date()): string => {
+  const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  target.setDate(target.getDate() - ((target.getDay() + 6) % 7) + 3);
+  const firstThursday = new Date(target.getFullYear(), 0, 4);
+  const week =
+    1 +
+    Math.round(
+      ((target.getTime() - firstThursday.getTime()) / 86_400_000 -
+        3 +
+        ((firstThursday.getDay() + 6) % 7)) /
+        7
+    );
+  return `${target.getFullYear()}-S${String(week).padStart(2, "0")}`;
+};
+
 export const currentMonthKey = (): string => todayKey().slice(0, 7);
 
 export const shiftMonth = (monthKey: string, months: number): string => {
@@ -142,14 +194,18 @@ export const newId = (): string =>
     ? crypto.randomUUID()
     : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
-export const useStoredState = <T,>(key: string, initial: T) => {
+export const useStoredState = <T,>(key: string, initial: T, seed?: () => T) => {
   const [state, setState] = useState<T>(initial);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(key);
-      if (raw !== null) {
+      if (raw === null) {
+        if (seed) {
+          setState(seed());
+        }
+      } else {
         setState(JSON.parse(raw) as T);
       }
     } catch {
@@ -157,7 +213,7 @@ export const useStoredState = <T,>(key: string, initial: T) => {
       return;
     }
     setLoaded(true);
-  }, [key]);
+  }, [key, seed]);
 
   useEffect(() => {
     if (!loaded) {

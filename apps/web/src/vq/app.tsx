@@ -2,15 +2,17 @@ import { useEffect, useState } from "react";
 
 import { todayLabel, useStoredState } from "./storage";
 import { BudgetModule } from "./budget";
+import { ChoresModule } from "./chores";
 import { HabitsModule } from "./habits";
 import { InstallButton } from "./install";
 import { TasksModule } from "./tasks";
 
-type TabId = "tasks" | "habits" | "budget";
+type TabId = "tasks" | "habits" | "chores" | "budget";
 
 const TABS: { id: TabId; label: string; icon: string }[] = [
   { id: "tasks", label: "Tâches", icon: "✓" },
   { id: "habits", label: "Habitudes", icon: "◎" },
+  { id: "chores", label: "Maison", icon: "⌂" },
   { id: "budget", label: "Budget", icon: "€" },
 ];
 
@@ -50,6 +52,8 @@ export const App = () => {
           <TasksModule />
         ) : tab === "habits" ? (
           <HabitsModule />
+        ) : tab === "chores" ? (
+          <ChoresModule />
         ) : (
           <BudgetModule />
         )}
