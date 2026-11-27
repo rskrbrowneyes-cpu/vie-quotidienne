@@ -1,9 +1,16 @@
 type GingerCatProps = {
   happy?: boolean;
+  sleepy?: boolean;
+  excited?: boolean;
   className?: string;
 };
 
-export function GingerCat({ happy = false, className = "" }: GingerCatProps) {
+export function GingerCat({
+  happy = false,
+  sleepy = false,
+  excited = false,
+  className = "",
+}: GingerCatProps) {
   return (
     <svg
       viewBox="0 0 120 120"
@@ -11,7 +18,11 @@ export function GingerCat({ happy = false, className = "" }: GingerCatProps) {
       aria-label="Kotton, le chat roux mascotte"
       className={className}
     >
-      <g className={happy ? undefined : "vq-cat-tail"}>
+      <g
+        className={
+          happy ? undefined : `vq-cat-tail${excited ? " vq-cat-tail-fast" : ""}`
+        }
+      >
         <path
           d="M92 84 C 106 82, 112 70, 108 56"
           fill="none"
@@ -73,15 +84,15 @@ export function GingerCat({ happy = false, className = "" }: GingerCatProps) {
           opacity="0.6"
         />
         <ellipse cx="60" cy="68" rx="13" ry="9" fill="#FFF4E8" />
-        {happy ? (
+        {happy || sleepy ? (
           <g
             stroke="#3E2C22"
             strokeWidth="3.4"
             strokeLinecap="round"
             fill="none"
           >
-            <path d="M42 50 Q 47 44 52 50" />
-            <path d="M68 50 Q 73 44 78 50" />
+            <path d={happy ? "M42 50 Q 47 44 52 50" : "M42 50 Q 47 54 52 50"} />
+            <path d={happy ? "M68 50 Q 73 44 78 50" : "M68 50 Q 73 54 78 50"} />
           </g>
         ) : (
           <g className="vq-cat-eyes">

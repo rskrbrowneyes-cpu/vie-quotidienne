@@ -278,15 +278,16 @@ export const ChoresModule = () => {
 
   return (
     <section className="flex flex-col gap-4">
-      <CatScene
-        progress={progress}
-        complete={missionComplete}
-        celebrating={celebrating}
-        activity={activity}
-        activityKey={activityKey}
-        hopKey={hopKey}
-        particles={particles}
-      >
+      <div className="sticky top-[calc(env(safe-area-inset-top)+68px)] z-30">
+        <CatScene
+          progress={progress}
+          complete={missionComplete}
+          celebrating={celebrating}
+          activity={activity}
+          activityKey={activityKey}
+          hopKey={hopKey}
+          particles={particles}
+        >
         <div className="border-t-2 border-accent bg-surface/85 px-4 py-3 backdrop-blur-sm">
           <div className="flex items-center justify-between">
             <p className="text-sm font-semibold">
@@ -310,7 +311,8 @@ export const ChoresModule = () => {
             </span>
           </p>
         </div>
-      </CatScene>
+        </CatScene>
+      </div>
 
       <div
         className={`relative overflow-hidden rounded-2xl border p-4 ${

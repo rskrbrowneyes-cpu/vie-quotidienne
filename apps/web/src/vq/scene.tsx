@@ -90,6 +90,16 @@ const SINK_BUBBLES = [
   { left: -6, delay: 1000, size: "text-xs" },
 ];
 
+const SINK_DROPS = [
+  { left: 40, delay: 0 },
+  { left: 50, delay: 450 },
+];
+
+const VACUUM_DIRT = [
+  { left: 10, delay: 200 },
+  { left: 22, delay: 800 },
+];
+
 const SAND_MOTES = [
   { left: 2, delay: 0 },
   { left: 18, delay: 220 },
@@ -122,6 +132,15 @@ const SinkProp = () => (
     <rect x="30" y="50" width="50" height="12" rx="5" fill="#ECDFD0" />
     <path d="M55 10 L 55 22 Q 55 30 47 30" stroke="#8D8071" strokeWidth="6" strokeLinecap="round" fill="none" />
     <circle cx="45" cy="32" r="3" fill="#8D8071" />
+    <rect
+      x="42"
+      y="33"
+      width="6"
+      height="12"
+      rx="3"
+      fill="#7FB5D6"
+      className="animate-vq-stream"
+    />
     <rect x="66" y="28" width="26" height="10" rx="4" fill="#FF7000" />
     <rect x="70" y="24" width="18" height="4" rx="2" fill="#FF8A33" />
   </svg>
@@ -171,6 +190,7 @@ export function CatScene({
   const night = hour >= 20 || hour < 7;
   const dirt = complete ? 0 : 1 - progress;
   const active = activity !== "idle";
+  const sleeping = night && !active && !complete;
   const catPose = !active
     ? undefined
     : activity === "sweep" || activity === "dust" || activity === "windows"
@@ -278,9 +298,25 @@ export function CatScene({
       <div className="absolute bottom-[13%] left-4 flex items-end gap-1">
         <div key={`hop-${hopKey}`} className={hopKey > 0 ? "animate-vq-hop" : undefined}>
           <div key={activityKey} className={catPose}>
-            <GingerCat happy={complete} className="size-32 drop-shadow-md" />
+            <GingerCat
+              happy={complete}
+              sleepy={sleeping}
+              excited={active}
+              className="size-32 drop-shadow-md"
+            />
           </div>
         </div>
+        {sleeping ? (
+          <div className="relative" aria-hidden>
+            <span className="animate-vq-rise absolute -top-8 left-0 text-sm">💤</span>
+            <span
+              className="animate-vq-rise absolute -top-10 left-5 text-xs"
+              style={{ animationDelay: "700ms" }}
+            >
+              💤
+            </span>
+          </div>
+        ) : null}
         {activity === "sweep" ? (
           <BroomProp />
         ) : null}
@@ -295,11 +331,29 @@ export function CatScene({
             >
               🫧
             </span>
+            {VACUUM_DIRT.map((speck, index) => (
+              <span
+                key={index}
+                className="animate-vq-twinkle absolute -bottom-0.5 size-1.5 rounded-full bg-muted"
+                style={{ left: `${speck.left}px`, animationDelay: `${speck.delay}ms` }}
+                aria-hidden
+              />
+            ))}
           </div>
         ) : null}
         {activity === "dishes" ? (
           <div className="relative">
             <SinkProp />
+            {SINK_DROPS.map((drop, index) => (
+              <span
+                key={index}
+                className="animate-vq-drip absolute top-11 text-[10px]"
+                style={{ left: `${drop.left}px`, animationDelay: `${drop.delay}ms` }}
+                aria-hidden
+              >
+                💧
+              </span>
+            ))}
             {SINK_BUBBLES.map((bubble, index) => (
               <span
                 key={index}
@@ -387,6 +441,11 @@ export function CatScene({
       {active ? (
         <div className="animate-vq-float absolute left-1/2 top-3 -translate-x-1/2 rounded-full bg-ink/90 px-3 py-1 text-[11px] font-semibold text-canvas">
           {ACTIVITY_CAPTIONS[activity]}
+        </div>
+      ) : null}
+      {sleeping ? (
+        <div className="animate-vq-float absolute left-1/2 top-3 -translate-x-1/2 rounded-full bg-ink/90 px-3 py-1 text-[11px] font-semibold text-canvas">
+          Chut… Kotton dort. 💤
         </div>
       ) : null}
 
