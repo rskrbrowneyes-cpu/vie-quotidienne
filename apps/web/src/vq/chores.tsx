@@ -297,7 +297,7 @@ export const ChoresModule = () => {
           </div>
           <div className="mt-2 h-3 overflow-hidden rounded-full bg-raised">
             <div
-              className="animate-vq-shine h-full rounded-full bg-accent"
+              className="animate-vq-shimmer h-full rounded-full"
               style={{ width: `${Math.round((into / needed) * 100)}%` }}
             />
           </div>

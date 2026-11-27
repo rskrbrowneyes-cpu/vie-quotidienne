@@ -198,50 +198,76 @@ export function CatScene({
         : "animate-vq-bob";
 
   return (
-    <div className="relative h-[38vh] max-h-[420px] min-h-[280px] overflow-hidden rounded-t-2xl border-2 border-b-0 border-accent bg-gradient-to-b from-accent-soft to-raised">
-      {night ? (
-        <>
-          {STARS.map((star, index) => (
-            <span
-              key={index}
-              className="animate-vq-shine absolute text-[8px]"
-              style={{ left: `${star.left}%`, top: `${star.top}%`, animationDelay: `${star.delay}s` }}
-              aria-hidden
-            >
-              ✦
-            </span>
-          ))}
-          <span className="absolute left-6 top-4 text-4xl" aria-hidden>
-            🌙
-          </span>
-        </>
-      ) : (
-        <>
-          <span className="absolute left-6 top-3 text-5xl" aria-hidden>
-            ☀️
-          </span>
+    <div
+      className={`relative h-[38vh] max-h-[420px] min-h-[280px] overflow-hidden rounded-t-2xl border-2 border-b-0 border-accent bg-gradient-to-b from-accent-soft to-raised ${
+        celebrating ? "animate-vq-shake" : ""
+      }`}
+    >
+      <div
+        className={`absolute inset-0 transition-opacity duration-1000 ${
+          night ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+        aria-hidden
+      >
+        {STARS.map((star, index) => (
           <span
-            className="animate-vq-float absolute right-10 top-8 text-3xl opacity-70"
-            style={{ animationDuration: "5s" }}
-            aria-hidden
+            key={index}
+            className="animate-vq-shine absolute text-[8px]"
+            style={{
+              left: `${star.left}%`,
+              top: `${star.top}%`,
+              animationDelay: `${star.delay}s`,
+            }}
           >
-            ☁️
+            ✦
           </span>
-          <span
-            className="animate-vq-float absolute right-32 top-16 text-2xl opacity-50"
-            style={{ animationDuration: "6.5s", animationDelay: "1.2s" }}
-            aria-hidden
-          >
-            ☁️
-          </span>
-        </>
-      )}
+        ))}
+        <span className="animate-vq-shoot absolute left-[30%] top-6 text-[10px]">
+          ☄️
+        </span>
+        <div className="animate-vq-glow absolute left-3 top-1 size-16 rounded-full bg-[#ffd9a8]/40 blur-md" />
+        <span className="absolute left-6 top-4 text-4xl">🌙</span>
+      </div>
+      <div
+        className={`absolute inset-0 transition-opacity duration-1000 ${
+          night ? "pointer-events-none opacity-0" : "opacity-100"
+        }`}
+        aria-hidden
+      >
+        <div className="animate-vq-glow absolute left-2 top-0 size-20 rounded-full bg-[#ffe1b0]/60 blur-md" />
+        <span className="absolute left-6 top-3 text-5xl">☀️</span>
+        <span
+          className="animate-vq-drift absolute right-10 top-8 text-3xl opacity-70"
+          style={{ animationDuration: "11s" }}
+        >
+          ☁️
+        </span>
+        <span
+          className="animate-vq-drift absolute right-32 top-16 text-2xl opacity-50"
+          style={{ animationDuration: "14s", animationDelay: "1.6s" }}
+        >
+          ☁️
+        </span>
+      </div>
 
-      <div className="absolute right-4 top-4 h-16 w-20 overflow-hidden rounded-md border-4 border-surface bg-canvas/80">
+      <div
+        className={`absolute right-4 top-4 h-16 w-20 overflow-hidden rounded-md border-4 border-surface bg-canvas/80 ${
+          night ? "bg-ink/50" : ""
+        }`}
+      >
         <div className="absolute left-1/2 top-0 h-full w-1 -translate-x-1/2 bg-surface" />
         <div className="absolute top-1/2 left-0 h-1 w-full -translate-y-1/2 bg-surface" />
+        {!night ? (
+          <div
+            className="absolute -left-2 -top-2 h-24 w-10 -rotate-[24deg] bg-gradient-to-br from-white/70 to-transparent blur-[2px]"
+            aria-hidden
+          />
+        ) : null}
         {complete ? (
-          <span className="animate-vq-twinkle absolute bottom-1 left-2 text-xs" aria-hidden>
+          <span
+            className="animate-vq-twinkle absolute bottom-1 left-2 text-xs"
+            aria-hidden
+          >
             ✨
           </span>
         ) : null}
@@ -249,12 +275,21 @@ export function CatScene({
 
       <div className="absolute inset-x-0 bottom-0 h-[26%] border-t-2 border-line bg-line/50" />
       <div className="absolute bottom-[7%] left-6 h-9 w-44 rounded-[50%] border-2 border-accent/40 bg-accent-soft" />
-      <span className="absolute bottom-[22%] right-3 text-4xl" aria-hidden>
+      <span className="animate-vq-sway absolute bottom-[22%] right-3 text-4xl" aria-hidden>
         🪴
       </span>
-      <span className="absolute bottom-[20%] right-16 text-2xl" aria-hidden>
+      <span
+        className={`absolute bottom-[20%] right-16 text-2xl ${
+          activity === "laundry" ? "animate-vq-wobble" : ""
+        }`}
+        aria-hidden
+      >
         🧺
       </span>
+      <div
+        className="absolute bottom-[9%] left-7 h-3 w-24 rounded-[50%] bg-ink/10"
+        aria-hidden
+      />
 
       <div
         className="pointer-events-none absolute inset-0 transition-opacity duration-700"
@@ -294,14 +329,19 @@ export function CatScene({
         : null}
 
       <div className="absolute bottom-[13%] left-4 flex items-end gap-1">
-        <div key={`hop-${hopKey}`} className={hopKey > 0 ? "animate-vq-hop" : undefined}>
-          <div key={activityKey} className={catPose}>
-            <GingerCat
-              happy={complete}
-              sleepy={sleeping}
-              excited={active}
-              className="size-32 drop-shadow-md"
-            />
+        <div key={`in-${activityKey}`} className="animate-vq-entrance">
+          <div
+            key={`hop-${hopKey}`}
+            className={hopKey > 0 ? "animate-vq-hop" : undefined}
+          >
+            <div key={activityKey} className={catPose}>
+              <GingerCat
+                happy={complete}
+                sleepy={sleeping}
+                excited={active}
+                className="size-32 drop-shadow-md"
+              />
+            </div>
           </div>
         </div>
         {sleeping ? (
@@ -319,9 +359,30 @@ export function CatScene({
           <BroomProp />
         ) : null}
         {activity === "dust" ? <DusterProp /> : null}
+        {activity === "sweep" ? (
+          <div className="relative">
+            <BroomProp />
+            <span
+              className="animate-vq-particle absolute bottom-0 left-1 text-sm opacity-60"
+              aria-hidden
+            >
+              🌫️
+            </span>
+            <span
+              className="animate-vq-particle absolute bottom-0 left-6 text-xs opacity-50"
+              style={{ animationDelay: "450ms" }}
+              aria-hidden
+            >
+              🌫️
+            </span>
+          </div>
+        ) : null}
+        {activity === "dust" ? <DusterProp /> : null}
         {activity === "vacuum" ? (
           <div className="relative -ml-4">
-            <VacuumProp />
+            <div className="animate-vq-bob">
+              <VacuumProp />
+            </div>
             <span
               className="animate-vq-particle absolute -left-4 bottom-1 text-xs"
               style={{ animationDelay: "300ms" }}
@@ -342,6 +403,11 @@ export function CatScene({
         {activity === "dishes" ? (
           <div className="relative">
             <SinkProp />
+            <div className="absolute bottom-[30px] left-9 flex" aria-hidden>
+              <span className="size-2.5 rounded-full bg-white/90" />
+              <span className="-ml-1 size-3 rounded-full bg-white/95" />
+              <span className="-ml-1 size-2 rounded-full bg-white/90" />
+            </div>
             {SINK_DROPS.map((drop, index) => (
               <span
                 key={index}
@@ -449,6 +515,10 @@ export function CatScene({
 
       {celebrating ? (
         <>
+          <div
+            className="animate-vq-burst absolute bottom-[20%] left-1/2 size-32 rounded-full border-4 border-accent/60"
+            aria-hidden
+          />
           {CELEBRATION.map((particle, index) => (
             <span
               key={index}

@@ -269,6 +269,112 @@
   }
 }
 
+@keyframes vq-glow {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.18);
+  }
+}
+
+@keyframes vq-sway {
+  0%,
+  100% {
+    transform: rotate(-2.5deg);
+  }
+  50% {
+    transform: rotate(2.5deg);
+  }
+}
+
+@keyframes vq-entrance {
+  0% {
+    opacity: 0;
+    transform: translateX(-56px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes vq-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes vq-shake {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(1px, -1px) rotate(0.3deg);
+  }
+  50% {
+    transform: translate(-1px, 1px) rotate(-0.3deg);
+  }
+  75% {
+    transform: translate(1px, 1px) rotate(0.2deg);
+  }
+}
+
+@keyframes vq-burst {
+  0% {
+    opacity: 0.7;
+    transform: translate(-50%, 0) scale(0.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 0) scale(1.7);
+  }
+}
+
+@keyframes vq-shoot {
+  0%,
+  70% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(-20deg);
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(120px, 60px) rotate(-20deg);
+  }
+}
+
+@keyframes vq-drift-x {
+  0% {
+    transform: translateX(-24px);
+  }
+  100% {
+    transform: translateX(24px);
+  }
+}
+
+@keyframes vq-wobble {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-6deg);
+  }
+  75% {
+    transform: rotate(6deg);
+  }
+}
+
 @keyframes vq-lean {
   0%,
   100% {
@@ -387,6 +493,50 @@
   transform-origin: top;
 }
 
+.animate-vq-glow {
+  animation: vq-glow 3.4s ease-in-out infinite;
+}
+
+.animate-vq-sway {
+  animation: vq-sway 4.5s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+.animate-vq-entrance {
+  animation: vq-entrance 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-vq-shimmer {
+  background-image: linear-gradient(
+    100deg,
+    var(--vq-accent) 42%,
+    #ffc48a 50%,
+    var(--vq-accent) 58%
+  );
+  background-size: 200% 100%;
+  animation: vq-shimmer 2.2s linear infinite;
+}
+
+.animate-vq-shake {
+  animation: vq-shake 380ms ease-in-out 3;
+}
+
+.animate-vq-burst {
+  animation: vq-burst 900ms ease-out forwards;
+}
+
+.animate-vq-shoot {
+  animation: vq-shoot 7s linear infinite 2s;
+}
+
+.animate-vq-drift {
+  animation: vq-drift-x 9s ease-in-out infinite alternate;
+}
+
+.animate-vq-wobble {
+  animation: vq-wobble 900ms ease-in-out infinite;
+}
+
 .animate-vq-celebrate {
   animation: vq-celebrate 1.7s ease-in forwards;
 }
@@ -434,7 +584,16 @@
   .animate-vq-duster,
   .animate-vq-lean,
   .animate-vq-drip,
-  .animate-vq-stream {
+  .animate-vq-stream,
+  .animate-vq-glow,
+  .animate-vq-sway,
+  .animate-vq-entrance,
+  .animate-vq-shimmer,
+  .animate-vq-shake,
+  .animate-vq-burst,
+  .animate-vq-shoot,
+  .animate-vq-drift,
+  .animate-vq-wobble {
     animation: none;
   }
 }
