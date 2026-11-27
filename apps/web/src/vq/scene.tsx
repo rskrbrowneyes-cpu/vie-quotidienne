@@ -148,7 +148,7 @@ type RoomProps = {
   children?: ReactNode;
 };
 
-const RoomDiorama = ({
+export const RoomDiorama = ({
   night,
   complete,
   dishesFx,
