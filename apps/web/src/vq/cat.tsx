@@ -1,85 +1,123 @@
-type PixelCatProps = {
+type CatProps = {
   happy?: boolean;
   sleepy?: boolean;
   excited?: boolean;
   className?: string;
 };
 
-export function PixelCat({
+export function KottonCat({
   happy = false,
   sleepy = false,
   excited = false,
   className = "",
-}: PixelCatProps) {
+}: CatProps) {
   return (
     <svg
-      viewBox="0 0 32 26"
-      shapeRendering="crispEdges"
+      viewBox="0 0 64 52"
       role="img"
       aria-label="Kotton, le chat roux mascotte"
       className={className}
     >
+      <defs>
+        <linearGradient id="vq-fur" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#FFAE63" />
+          <stop offset="0.55" stopColor="#F0954F" />
+          <stop offset="1" stopColor="#E08A3C" />
+        </linearGradient>
+        <linearGradient id="vq-fur-head" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#FFB877" />
+          <stop offset="1" stopColor="#F0954F" />
+        </linearGradient>
+      </defs>
       <g className={happy ? undefined : `vq-cat-tail${excited ? " vq-cat-tail-fast" : ""}`}>
-        <rect x="23" y="14" width="2" height="3" fill="#F0954F" />
-        <rect x="24" y="12" width="2" height="3" fill="#F0954F" />
-        <rect x="25" y="9" width="2" height="4" fill="#F0954F" />
-        <rect x="26" y="6" width="2" height="4" fill="#F0954F" />
-        <rect x="26" y="6" width="2" height="2" fill="#C96F2B" />
+        <path
+          d="M44 32 C56 30 59 22 55 12"
+          fill="none"
+          stroke="url(#vq-fur)"
+          strokeWidth="6.5"
+          strokeLinecap="round"
+        />
+        <circle cx="55" cy="10.6" r="3.3" fill="#C96F2B" />
+        <circle cx="54.3" cy="11.6" r="1.1" fill="#FFB877" opacity="0.6" />
       </g>
       <g className="vq-cat-body">
-        <rect x="8" y="12" width="14" height="10" fill="#F0954F" />
-        <rect x="8" y="20" width="14" height="2" fill="#E08A3C" />
-        <rect x="8" y="12" width="14" height="1" fill="#FFB877" opacity="0.7" />
-        <rect x="11" y="14" width="6" height="7" fill="#FFF4E8" />
-        <rect x="11" y="19" width="6" height="2" fill="#F0E0CC" />
-        <rect x="8" y="14" width="1" height="3" fill="#C96F2B" />
-        <rect x="21" y="16" width="1" height="3" fill="#C96F2B" />
-        <rect x="9" y="21" width="3" height="2" fill="#FFF4E8" />
-        <rect x="17" y="21" width="3" height="2" fill="#FFF4E8" />
+        <ellipse cx="30" cy="38" rx="17" ry="11.5" fill="url(#vq-fur)" />
+        <g stroke="#C96F2B" strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.65">
+          <path d="M18 30.5 Q23 33 28.5 33.2" />
+          <path d="M36 29.5 Q40 31 44 30.4" />
+        </g>
+        <ellipse cx="28.5" cy="41.5" rx="9.5" ry="7" fill="#FFF4E8" />
+        <ellipse cx="16.5" cy="47.5" rx="4.6" ry="2.7" fill="#FFF4E8" />
+        <ellipse cx="40" cy="47.5" rx="4.6" ry="2.7" fill="#FFF4E8" />
         <g className="vq-cat-ear-l">
-          <rect x="7" y="2" width="3" height="3" fill="#F0954F" />
-          <rect x="8" y="3" width="1" height="1" fill="#F6B39B" />
+          <path
+            d="M13 13 L15.5 2 L23.5 8.5 Z"
+            fill="url(#vq-fur)"
+            stroke="url(#vq-fur)"
+            strokeWidth="1.5"
+            strokeLinejoin="round"
+          />
+          <path d="M15.6 10.5 L16.6 5.2 L20.8 8.4 Z" fill="#F6B39B" />
         </g>
         <g className="vq-cat-ear-r">
-          <rect x="18" y="2" width="3" height="3" fill="#F0954F" />
-          <rect x="19" y="3" width="1" height="1" fill="#F6B39B" />
+          <path
+            d="M26.5 8.5 L34.5 2 L37 13 Z"
+            fill="url(#vq-fur)"
+            stroke="url(#vq-fur)"
+            strokeWidth="1.5"
+            strokeLinejoin="round"
+          />
+          <path d="M29.2 8.4 L33.4 5.2 L34.4 10.5 Z" fill="#F6B39B" />
         </g>
-        <rect x="6" y="5" width="16" height="9" fill="#F0954F" />
-        <rect x="6" y="5" width="16" height="1" fill="#FFB877" opacity="0.7" />
-        <rect x="6" y="12" width="16" height="2" fill="#E08A3C" />
-        <rect x="6" y="5" width="1" height="9" fill="#E08A3C" opacity="0.55" />
-        <rect x="21" y="5" width="1" height="9" fill="#FFB877" opacity="0.55" />
-        <rect x="11" y="5" width="1" height="2" fill="#C96F2B" />
-        <rect x="14" y="5" width="1" height="2" fill="#C96F2B" />
-        <rect x="17" y="5" width="1" height="2" fill="#C96F2B" />
-        <rect x="11" y="10" width="6" height="3" fill="#FFF4E8" />
+        <circle cx="25" cy="19" r="13.5" fill="url(#vq-fur-head)" />
+        <g stroke="#C96F2B" strokeWidth="1.6" strokeLinecap="round" opacity="0.7">
+          <path d="M20 8.8 V11.8" />
+          <path d="M24.5 8 V11.4" />
+          <path d="M29 8.8 V11.8" />
+        </g>
         {happy ? (
-          <g fill="#3E2C22">
-            <rect x="9" y="8" width="1" height="1" />
-            <rect x="11" y="8" width="1" height="1" />
-            <rect x="10" y="7" width="1" height="1" />
-            <rect x="17" y="8" width="1" height="1" />
-            <rect x="19" y="8" width="1" height="1" />
-            <rect x="18" y="7" width="1" height="1" />
+          <g stroke="#3E2C22" strokeWidth="1.8" strokeLinecap="round" fill="none">
+            <path d="M16 19 Q19 15.8 22 19" />
+            <path d="M28 19 Q31 15.8 34 19" />
           </g>
         ) : sleepy ? (
-          <g fill="#3E2C22">
-            <rect x="9" y="9" width="2" height="1" />
-            <rect x="17" y="9" width="2" height="1" />
+          <g stroke="#3E2C22" strokeWidth="1.8" strokeLinecap="round">
+            <path d="M16.5 19 H21.5" />
+            <path d="M28.5 19 H33.5" />
           </g>
         ) : (
           <g className="vq-cat-eyes">
-            <rect x="9" y="8" width="2" height="2" fill="#3E2C22" />
-            <rect x="17" y="8" width="2" height="2" fill="#3E2C22" />
-            <rect x="9" y="8" width="1" height="1" fill="#FFF4E8" />
-            <rect x="17" y="8" width="1" height="1" fill="#FFF4E8" />
+            <circle cx="19" cy="18.5" r="2.4" fill="#3E2C22" />
+            <circle cx="31" cy="18.5" r="2.4" fill="#3E2C22" />
+            <circle cx="18.2" cy="17.7" r="0.8" fill="#FFF4E8" />
+            <circle cx="30.2" cy="17.7" r="0.8" fill="#FFF4E8" />
           </g>
         )}
-        <rect x="14" y="10" width="2" height="1" fill="#E0705A" />
-        <rect x="4" y="9" width="2" height="1" fill="#3E2C22" opacity="0.6" />
-        <rect x="4" y="11" width="2" height="1" fill="#3E2C22" opacity="0.6" />
-        <rect x="22" y="9" width="2" height="1" fill="#3E2C22" opacity="0.6" />
-        <rect x="22" y="11" width="2" height="1" fill="#3E2C22" opacity="0.6" />
+        {happy || sleepy ? null : (
+          <g fill="#F6B39B" opacity="0.55">
+            <circle cx="14.5" cy="23" r="2" />
+            <circle cx="35.5" cy="23" r="2" />
+          </g>
+        )}
+        <ellipse cx="25" cy="26" rx="6.6" ry="4.6" fill="#FFF4E8" />
+        <path
+          d="M23.6 23.2 H26.4 L25 25 Z"
+          fill="#E0705A"
+          stroke="#E0705A"
+          strokeWidth="0.8"
+          strokeLinejoin="round"
+        />
+        <g stroke="#3E2C22" strokeWidth="0.9" strokeLinecap="round" fill="none" opacity="0.75">
+          <path d="M25 25.4 V26.4" />
+          <path d="M25 26.4 Q23.6 28 22.2 26.8" />
+          <path d="M25 26.4 Q26.4 28 27.8 26.8" />
+        </g>
+        <g stroke="#3E2C22" strokeWidth="0.8" strokeLinecap="round" opacity="0.45">
+          <path d="M11.5 23.5 L4.5 22.5" />
+          <path d="M11.5 26 L4.8 27.5" />
+          <path d="M38.5 23.5 L45.5 22.5" />
+          <path d="M38.5 26 L45.2 27.5" />
+        </g>
       </g>
     </svg>
   );
