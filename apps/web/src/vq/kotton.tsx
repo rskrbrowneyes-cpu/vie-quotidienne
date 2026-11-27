@@ -107,6 +107,7 @@ export function KottonModule() {
   const lastDrag = useRef(0);
   const stroke = useRef({ active: false, lastY: 0, accum: 0 });
   const heartTimes = useRef<number[]>([]);
+  const heartTimers = useRef<number[]>([]);
   const timers = useRef<number[]>([]);
   const audioRef = useRef<AudioContext | null>(null);
   const purrNodes = useRef<{ osc: OscillatorNode; lfo: OscillatorNode; gain: GainNode } | null>(null);
@@ -125,6 +126,7 @@ export function KottonModule() {
   useEffect(
     () => () => {
       clearTimers();
+      heartTimers.current.forEach((t) => window.clearTimeout(t));
       [walkTimer, purrTimer, idleTimer, sleepTimer, bellyTimer].forEach((timer) => {
         if (timer.current !== undefined) window.clearTimeout(timer.current);
       });
@@ -254,6 +256,14 @@ export function KottonModule() {
     setPouncing(false);
   };
 
+  const dropHeartLater = (id: number, ms: number) => {
+    heartTimers.current.push(
+      window.setTimeout(() => {
+        setHearts((h) => h.filter((heart) => heart.id !== id));
+      }, ms)
+    );
+  };
+
   const bellyRub = () => {
     setCuddles((c) => c + 5);
     setBelly(true);
@@ -270,13 +280,13 @@ export function KottonModule() {
       left: 28 + Math.random() * 44,
     }));
     setHearts((h) => [...h, ...batch]);
-    later(() => setHearts((h) => h.filter((heart) => !batch.some((b) => b.id === heart.id))), 2200);
+    batch.forEach((b) => dropHeartLater(b.id, 2200));
   };
 
   const addHeart = () => {
     const id = Date.now() + Math.random();
-    setHearts((h) => [...h, { id, left: 34 + Math.random() * 32 }]);
-    later(() => setHearts((h) => h.filter((heart) => heart.id !== id)), 1700);
+    setHearts((h) => (h.length >= 4 ? h : [...h, { id, left: 34 + Math.random() * 32 }]));
+    dropHeartLater(id, 1700);
     const now = Date.now();
     heartTimes.current = [...heartTimes.current.filter((t) => now - t < 4000), now];
     if (heartTimes.current.length >= 5) {
@@ -390,7 +400,7 @@ export function KottonModule() {
     if (!point) return;
     const catScreenX = catX - camLeft;
     if (point.y > 40 && point.y < 96 && Math.abs(point.x - catScreenX) < 30) {
-      if (!stroke.current.active) return;
+      if (!stroke.current.active || moving) return;
       stroke.current.accum += Math.abs(point.y - stroke.current.lastY);
       stroke.current.lastY = point.y;
       if (stroke.current.accum >= 20) {

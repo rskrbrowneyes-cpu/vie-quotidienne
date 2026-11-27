@@ -1191,7 +1191,7 @@
 }
 
 .animate-vq-heart {
-  animation: vq-heart 1.5s ease-out infinite;
+  animation: vq-heart 1.5s ease-out forwards;
 }
 
 .animate-vq-pop {
