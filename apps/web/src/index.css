@@ -104,6 +104,115 @@
   }
 }
 
+@keyframes vq-tail {
+  0%,
+  100% {
+    transform: rotate(-6deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+}
+
+@keyframes vq-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.08);
+  }
+}
+
+@keyframes vq-particle {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.7);
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-72px) translateX(var(--vq-drift, 0px))
+      scale(1.15);
+  }
+}
+
+@keyframes vq-sweep {
+  0% {
+    opacity: 0;
+    transform: translateX(-28px) rotate(-12deg);
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(320px) rotate(10deg);
+  }
+}
+
+@keyframes vq-celebrate {
+  0% {
+    opacity: 0;
+    transform: translateY(-12px) rotate(0deg);
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(170px) rotate(220deg);
+  }
+}
+
+@keyframes vq-heart {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.6);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-22px) scale(1.1);
+  }
+}
+
+.vq-cat-tail {
+  animation: vq-tail 3.2s ease-in-out infinite;
+  transform-box: view-box;
+  transform-origin: 92px 82px;
+}
+
+.vq-cat-eyes {
+  animation: vq-blink 4.4s infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.animate-vq-particle {
+  animation: vq-particle 1.4s ease-out forwards;
+}
+
+.animate-vq-sweep {
+  animation: vq-sweep 900ms ease-in-out forwards;
+}
+
+.animate-vq-celebrate {
+  animation: vq-celebrate 1.7s ease-in forwards;
+}
+
+.animate-vq-heart {
+  animation: vq-heart 1.5s ease-out infinite;
+}
+
 .animate-vq-pop {
   animation: vq-pop 280ms ease;
 }
@@ -126,7 +235,13 @@
   .animate-vq-pop,
   .animate-vq-float,
   .animate-vq-bob,
-  .animate-vq-shine {
+  .animate-vq-shine,
+  .animate-vq-particle,
+  .animate-vq-sweep,
+  .animate-vq-celebrate,
+  .animate-vq-heart,
+  .vq-cat-tail,
+  .vq-cat-eyes {
     animation: none;
   }
 }
