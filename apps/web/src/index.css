@@ -798,6 +798,31 @@
   transform-origin: 31px 30px;
 }
 
+.vq-cat-arm-far {
+  transform-box: view-box;
+  transform-origin: 34px 31px;
+}
+
+.vq-cat-arm-fl {
+  transform-box: view-box;
+  transform-origin: 28px 33px;
+}
+
+.vq-cat-arm-fr {
+  transform-box: view-box;
+  transform-origin: 36px 33px;
+}
+
+.vq-cat-arm-bl {
+  transform-box: view-box;
+  transform-origin: 26px 34px;
+}
+
+.vq-cat-arm-br {
+  transform-box: view-box;
+  transform-origin: 38px 34px;
+}
+
 @keyframes vq-arm-scrub {
   0%,
   100% {
@@ -1132,6 +1157,11 @@
   .animate-vq-wipe,
   .animate-vq-turn,
   .vq-cat-arm,
+  .vq-cat-arm-far,
+  .vq-cat-arm-fl,
+  .vq-cat-arm-fr,
+  .vq-cat-arm-bl,
+  .vq-cat-arm-br,
   .vq-arm-scrub,
   .vq-arm-dig,
   .vq-arm-reach,

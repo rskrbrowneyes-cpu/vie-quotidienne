@@ -86,20 +86,35 @@ export function KottonCat({
             <path d="M20 31 Q26 34 32 34.2" />
             <path d="M38 30.5 Q43 31.5 47 30.6" />
           </g>
-          <ellipse cx="24.5" cy="47.5" rx="4.4" ry="2.6" fill="#FFF4E8" />
-          <ellipse cx="39.5" cy="47.5" rx="4.4" ry="2.6" fill="#FFF4E8" />
           {armClass ? (
-            <g className={`vq-cat-arm ${armClass}`}>
+            <g className={`vq-cat-arm-bl ${armClass}`}>
               <path
-                d="M32 34 V42.5"
+                d="M26 34 V42.5"
                 stroke="url(#vq-fur)"
-                strokeWidth="5"
+                strokeWidth="4.6"
                 fill="none"
                 strokeLinecap="round"
               />
-              <circle cx="32" cy="43" r="2.7" fill="#FFF4E8" />
+              <circle cx="26" cy="43" r="2.6" fill="#FFF4E8" />
             </g>
           ) : null}
+          {armClass ? (
+            <g
+              className={`vq-cat-arm-br ${armClass}`}
+              style={{ animationDelay: "-250ms" }}
+            >
+              <path
+                d="M38 34 V42.5"
+                stroke="url(#vq-fur)"
+                strokeWidth="4.6"
+                fill="none"
+                strokeLinecap="round"
+              />
+              <circle cx="38" cy="43" r="2.6" fill="#FFF4E8" />
+            </g>
+          ) : null}
+          <ellipse cx="24.5" cy="47.5" rx="4.4" ry="2.6" fill="#FFF4E8" />
+          <ellipse cx="39.5" cy="47.5" rx="4.4" ry="2.6" fill="#FFF4E8" />
           <g className="vq-cat-ear-l">
             <path
               d="M20.5 13 L23 2 L31 8.5 Z"
@@ -146,20 +161,35 @@ export function KottonCat({
         <g className="vq-cat-body">
           <ellipse cx="32" cy="38" rx="16" ry="11" fill="url(#vq-fur)" />
           <ellipse cx="32" cy="41.5" rx="8.5" ry="6.5" fill="#FFF4E8" />
-          <ellipse cx="25.5" cy="47.5" rx="4.4" ry="2.6" fill="#FFF4E8" />
-          <ellipse cx="38.5" cy="47.5" rx="4.4" ry="2.6" fill="#FFF4E8" />
           {armClass ? (
-            <g className={`vq-cat-arm ${armClass}`}>
+            <g className={`vq-cat-arm-fl ${armClass}`}>
               <path
-                d="M32 33 Q31.8 38 31.5 42.5"
+                d="M28 33 Q27 38 26.5 42.5"
                 stroke="url(#vq-fur)"
-                strokeWidth="5"
+                strokeWidth="4.6"
                 fill="none"
                 strokeLinecap="round"
               />
-              <circle cx="31.5" cy="43" r="2.7" fill="#FFF4E8" />
+              <circle cx="26.5" cy="43" r="2.6" fill="#FFF4E8" />
             </g>
           ) : null}
+          {armClass ? (
+            <g
+              className={`vq-cat-arm-fr ${armClass}`}
+              style={{ animationDelay: "-250ms" }}
+            >
+              <path
+                d="M36 33 Q36.8 38 37.5 42.5"
+                stroke="url(#vq-fur)"
+                strokeWidth="4.6"
+                fill="none"
+                strokeLinecap="round"
+              />
+              <circle cx="37.5" cy="43" r="2.6" fill="#FFF4E8" />
+            </g>
+          ) : null}
+          <ellipse cx="25.5" cy="47.5" rx="4.4" ry="2.6" fill="#FFF4E8" />
+          <ellipse cx="38.5" cy="47.5" rx="4.4" ry="2.6" fill="#FFF4E8" />
           <g className="vq-cat-ear-l">
             <path
               d="M20.5 13 L23 2 L31 8.5 Z"
@@ -250,6 +280,21 @@ export function KottonCat({
           <circle cx="54.3" cy="11.6" r="1.1" fill="#FFB877" opacity="0.6" />
         </g>
         <g className="vq-cat-body">
+          {armClass ? (
+            <g
+              className={`vq-cat-arm-far ${armClass}`}
+              style={{ animationDelay: "-250ms" }}
+            >
+              <path
+                d="M34 31 Q29 36 24 43"
+                stroke="#E08A3C"
+                strokeWidth="5"
+                fill="none"
+                strokeLinecap="round"
+              />
+              <circle cx="23.5" cy="43.5" r="2.8" fill="#F0E0CC" />
+            </g>
+          ) : null}
           <ellipse cx="30" cy="38" rx="17" ry="11.5" fill="url(#vq-fur)" />
           <g stroke="#C96F2B" strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.65">
             <path d="M18 30.5 Q23 33 28.5 33.2" />
