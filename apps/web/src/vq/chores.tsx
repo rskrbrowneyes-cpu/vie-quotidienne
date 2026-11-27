@@ -23,7 +23,7 @@ import {
 } from "./storage";
 import type { Chore, ChoreFrequency, ChoreHistoryEntry } from "./storage";
 import { CatScene } from "./scene";
-import type { Activity } from "./scene";
+import type { Activity, ParticleSpec, SceneParticle } from "./scene";
 import { SwipeToDelete } from "./swipe";
 
 const FREQUENCIES: ChoreFrequency[] = [
@@ -53,32 +53,43 @@ const FREQUENCY_OPTIONS: { value: ChoreFrequency; label: string }[] = [
   { value: "autumn", label: "Automne" },
 ];
 
+type ChoreTheme = { activity: Activity; particles: [ParticleSpec, ParticleSpec, ParticleSpec] };
+
+const SPARK: ParticleSpec = { kind: "star", color: "#FFE9D6" };
+const GLOW: ParticleSpec = { kind: "star", color: "#FFD9A8" };
+const BUBBLE: ParticleSpec = { kind: "bub", color: "#7FB5D6" };
+const BUBBLE_LIGHT: ParticleSpec = { kind: "bub", color: "#A5D8EC" };
+const SAND: ParticleSpec = { kind: "sq", color: "#D9B98C" };
+const DUSTY: ParticleSpec = { kind: "sq", color: "#C9B896" };
+const WOODEN: ParticleSpec = { kind: "sq", color: "#C9A876" };
+const ORANGE: ParticleSpec = { kind: "sq", color: "#FF8A33" };
+const LEAF: ParticleSpec = { kind: "sq", color: "#6FA85A" };
+const LEAF_LIGHT: ParticleSpec = { kind: "sq", color: "#8BC34A" };
+
 const CHORE_THEMES: {
   pattern: RegExp;
   activity: Activity;
-  emojis: [string, string];
+  particles: [ParticleSpec, ParticleSpec, ParticleSpec];
 }[] = [
-  { pattern: /liti[èe]re|d[ée]jection|bac/i, activity: "litter", emojis: ["🐾", "✨"] },
-  { pattern: /aspir|robot/i, activity: "vacuum", emojis: ["🫧", "✨"] },
-  { pattern: /balay/i, activity: "sweep", emojis: ["🧹", "✨"] },
-  { pattern: /vaisselle|évier|plaque/i, activity: "dishes", emojis: ["🫧", "✨"] },
-  { pattern: /poussi|plinthe|vmc|grille|hotte|cr[ée]dence/i, activity: "dust", emojis: ["✨", "🫧"] },
-  { pattern: /lessive|linge|draps|serviette|plaid|houss|rideau|matelas|textile/i, activity: "laundry", emojis: ["🫧", "🧺"] },
-  { pattern: /vitre|miroir|hublot/i, activity: "windows", emojis: ["✨", "💧"] },
-  { pattern: /poubelle|four|micro-ondes|d[ée]graissa|réfrigérateur|frigidaire|tarte|détart|joint/i, activity: "trash", emojis: ["🫧", "✨"] },
-  { pattern: /terrasse|buisson|feuille|végétal|jardin|gel/i, activity: "garden", emojis: ["🌿", "✨"] },
-  { pattern: /rang|trie|placard|rangement|organis|a[ée]rer|sol|marche|douche|wc|toilette|chasse|cuvette|salle de bain|lave-linge/i, activity: "tidy", emojis: ["📦", "✨"] },
+  { pattern: /liti[èe]re|d[ée]jection|bac/i, activity: "litter", particles: [SAND, SAND, SPARK] },
+  { pattern: /aspir|robot/i, activity: "vacuum", particles: [BUBBLE, SPARK, BUBBLE_LIGHT] },
+  { pattern: /balay/i, activity: "sweep", particles: [DUSTY, SPARK, SAND] },
+  { pattern: /vaisselle|évier|plaque/i, activity: "dishes", particles: [BUBBLE, BUBBLE_LIGHT, SPARK] },
+  { pattern: /poussi|plinthe|vmc|grille|hotte|cr[ée]dence/i, activity: "dust", particles: [GLOW, SPARK, DUSTY] },
+  { pattern: /lessive|linge|draps|serviette|plaid|houss|rideau|matelas|textile/i, activity: "laundry", particles: [ORANGE, BUBBLE, WOODEN] },
+  { pattern: /vitre|miroir|hublot/i, activity: "windows", particles: [SPARK, BUBBLE_LIGHT, GLOW] },
+  { pattern: /poubelle|four|micro-ondes|d[ée]graissa|réfrigérateur|frigidaire|tarte|détart|joint/i, activity: "trash", particles: [BUBBLE, SPARK, DUSTY] },
+  { pattern: /terrasse|buisson|feuille|végétal|jardin|gel/i, activity: "garden", particles: [LEAF, LEAF_LIGHT, SPARK] },
+  { pattern: /rang|trie|placard|rangement|organis|a[ée]rer|sol|marche|douche|wc|toilette|chasse|cuvette|salle de bain|lave-linge/i, activity: "tidy", particles: [WOODEN, SPARK, ORANGE] },
 ];
 
-const themeForChore = (
-  name: string
-): { activity: Activity; emojis: [string, string] } => {
+const themeForChore = (name: string): ChoreTheme => {
   for (const theme of CHORE_THEMES) {
     if (theme.pattern.test(name)) {
-      return { activity: theme.activity, emojis: theme.emojis };
+      return { activity: theme.activity, particles: theme.particles };
     }
   }
-  return { activity: "tidy", emojis: ["✨", "🫧"] };
+  return { activity: "tidy", particles: [SPARK, BUBBLE, ORANGE] };
 };
 
 const sectionsOf = (chores: readonly Chore[]) => {
@@ -97,7 +108,6 @@ const sectionsOf = (chores: readonly Chore[]) => {
 };
 
 type Toast = { id: number; text: string };
-type Particle = { id: number; emoji: string; drift: number; delay: number };
 
 export const ChoresModule = () => {
   const [chores, setChores, choresLoaded] = useStoredState<Chore[]>(
@@ -114,7 +124,7 @@ export const ChoresModule = () => {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [poppedId, setPoppedId] = useState<string | null>(null);
   const toastCounter = useRef(0);
-  const [particles, setParticles] = useState<Particle[]>([]);
+  const [particles, setParticles] = useState<SceneParticle[]>([]);
   const particleCounter = useRef(0);
   const [activity, setActivity] = useState<Activity>("idle");
   const [activityKey, setActivityKey] = useState(0);
@@ -169,8 +179,7 @@ export const ChoresModule = () => {
   };
 
   const spawnParticles = (choreName: string) => {
-    const { activity: next, emojis } = themeForChore(choreName);
-    const [first, second] = emojis;
+    const { activity: next, particles: specs } = themeForChore(choreName);
     const drifts = [-18, 4, 20];
     particleCounter.current += 1;
     const base = particleCounter.current;
@@ -178,7 +187,7 @@ export const ChoresModule = () => {
       ...previous,
       ...drifts.map((drift, index) => ({
         id: base + index,
-        emoji: index % 2 === 0 ? first : second,
+        ...(specs[index] ?? SPARK),
         drift,
         delay: index * 90,
       })),

@@ -281,6 +281,18 @@
   }
 }
 
+@keyframes vq-twinkle {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: scale(0.75);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
 @keyframes vq-sway {
   0%,
   100% {
@@ -416,7 +428,7 @@
 .vq-cat-tail {
   animation: vq-tail 3.2s ease-in-out infinite;
   transform-box: view-box;
-  transform-origin: 92px 82px;
+  transform-origin: 24px 16px;
 }
 
 .vq-cat-eyes {
@@ -427,12 +439,14 @@
 
 .animate-vq-particle {
   animation: vq-particle 1.4s ease-out forwards;
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
 .vq-cat-body {
   animation: vq-breathe 3.2s ease-in-out infinite;
   transform-box: view-box;
-  transform-origin: 60px 100px;
+  transform-origin: 16px 24px;
 }
 
 .vq-cat-ear-l {
@@ -459,10 +473,14 @@
 
 .animate-vq-rise {
   animation: vq-rise 1.6s ease-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
 .animate-vq-tumble {
   animation: vq-tumble 1.8s linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
 .animate-vq-dig {
@@ -485,6 +503,14 @@
 
 .animate-vq-drip {
   animation: vq-drip 900ms ease-in infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.animate-vq-twinkle {
+  animation: vq-twinkle 1.8s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
 .animate-vq-stream {
@@ -495,6 +521,8 @@
 
 .animate-vq-glow {
   animation: vq-glow 3.4s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
 .animate-vq-sway {
@@ -531,6 +559,8 @@
 
 .animate-vq-drift {
   animation: vq-drift-x 9s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
 .animate-vq-wobble {
@@ -593,7 +623,8 @@
   .animate-vq-burst,
   .animate-vq-shoot,
   .animate-vq-drift,
-  .animate-vq-wobble {
+  .animate-vq-wobble,
+  .animate-vq-twinkle {
     animation: none;
   }
 }
