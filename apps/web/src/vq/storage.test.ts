@@ -10,7 +10,11 @@ import {
   shiftDays,
   shiftMonth,
   todayKey,
+  activityStreak,
   bestStreak,
+  computeXp,
+  earnedBadgeIds,
+  levelFromXp,
   chorePeriodKey,
   dailyCompletionRate,
   leastCompletedDaily,
@@ -177,6 +181,80 @@ describe("monthShortLabel", () => {
   it("abbreviates month names", () => {
     expect(monthShortLabel("2026-01")).toBe("janv.");
     expect(monthShortLabel("2026-08")).toBe("août");
+  });
+});
+
+describe("computeXp and levelFromXp", () => {
+  it("sums XP by frequency", () => {
+    const history: ChoreHistoryEntry[] = [
+      { id: "1", choreId: "a", choreName: "A", frequency: "daily", period: "2026-11-27", completedAt: "2026-11-27T08:00:00.000Z" },
+      { id: "2", choreId: "b", choreName: "B", frequency: "weekly", period: "2026-S48", completedAt: "2026-11-27T08:00:00.000Z" },
+      { id: "3", choreId: "c", choreName: "C", frequency: "monthly", period: "2026-11", completedAt: "2026-11-27T08:00:00.000Z" },
+    ];
+
+    expect(computeXp(history)).toBe(95);
+  });
+
+  it("levels up at growing thresholds", () => {
+    expect(levelFromXp(0).level).toBe(1);
+    expect(levelFromXp(99).level).toBe(1);
+    expect(levelFromXp(100).level).toBe(2);
+    expect(levelFromXp(100).into).toBe(0);
+    expect(levelFromXp(400).level).toBe(3);
+    expect(levelFromXp(400).into).toBe(100);
+  });
+});
+
+describe("activityStreak", () => {
+  it("counts consecutive active days, forgiving an unfinished today", () => {
+    const chores: Chore[] = [
+      {
+        id: "1",
+        name: "A",
+        frequency: "daily",
+        done: (() => {
+          const today = todayKey();
+          return {
+            [today]: true,
+            [shiftDays(today, -1)]: true,
+            [shiftDays(today, -2)]: true,
+          };
+        })(),
+      },
+    ];
+
+    expect(activityStreak(chores)).toBe(3);
+  });
+
+  it("returns zero without daily chores", () => {
+    expect(activityStreak([])).toBe(0);
+  });
+});
+
+describe("earnedBadgeIds", () => {
+  it("unlocks badges from history, level and streak", () => {
+    const history: ChoreHistoryEntry[] = [
+      { id: "1", choreId: "a", choreName: "Litière : déjections", frequency: "daily", period: "2026-11-27", completedAt: "2026-11-27T08:00:00.000Z" },
+    ];
+
+    const earned = earnedBadgeIds(history, 1, 0);
+    expect(earned.has("first")).toBe(true);
+    expect(earned.has("ten")).toBe(false);
+    expect(earned.has("boss")).toBe(false);
+
+    const advanced = earnedBadgeIds(
+      [
+        ...history,
+        { id: "2", choreId: "b", choreName: "Litière : vider le bac", frequency: "monthly", period: "2026-11", completedAt: "2026-11-27T08:00:00.000Z" },
+        { id: "3", choreId: "c", choreName: "Litière : clayettes", frequency: "daily", period: "2026-11-26", completedAt: "2026-11-26T08:00:00.000Z" },
+      ],
+      5,
+      7
+    );
+    expect(advanced.has("boss")).toBe(true);
+    expect(advanced.has("level5")).toBe(true);
+    expect(advanced.has("streak7")).toBe(true);
+    expect(advanced.has("litter")).toBe(true);
   });
 });
 

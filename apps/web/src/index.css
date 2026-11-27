@@ -54,9 +54,79 @@
  * Spinners and pulsing placeholders already say "loading" by their shape or accessible name, so they
  * hold still for a reader who asked for reduced motion.
  */
+@keyframes vq-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes vq-float {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.9);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-24px);
+  }
+}
+
+@keyframes vq-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes vq-shine {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.animate-vq-pop {
+  animation: vq-pop 280ms ease;
+}
+
+.animate-vq-float {
+  animation: vq-float 1.4s ease forwards;
+}
+
+.animate-vq-bob {
+  animation: vq-bob 2.4s ease-in-out infinite;
+}
+
+.animate-vq-shine {
+  animation: vq-shine 1.6s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-pulse,
-  .animate-spin {
+  .animate-spin,
+  .animate-vq-pop,
+  .animate-vq-float,
+  .animate-vq-bob,
+  .animate-vq-shine {
     animation: none;
   }
 }

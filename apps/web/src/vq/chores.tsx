@@ -1,18 +1,25 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 
 import {
+  BADGES,
   FREQUENCY_LABELS,
   FREQUENCY_SINGULAR,
   LEGACY_CHORE_NAMES,
+  activityStreak,
   chorePeriodKey,
+  computeXp,
   dailyCompletionRate,
   defaultChores,
+  earnedBadgeIds,
   formatDateTime,
   leastCompletedDaily,
+  levelFromXp,
   monthValidationCount,
   newId,
+  rankTitle,
   useStoredState,
+  xpFor,
 } from "./storage";
 import type { Chore, ChoreFrequency, ChoreHistoryEntry } from "./storage";
 import { SwipeToDelete } from "./swipe";
@@ -25,6 +32,15 @@ const FREQUENCIES: ChoreFrequency[] = [
   "spring",
   "autumn",
 ];
+
+const GROUP_META: Record<ChoreFrequency, { icon: string; boss: boolean }> = {
+  daily: { icon: "⚡", boss: false },
+  weekly: { icon: "🗺️", boss: false },
+  monthly: { icon: "👹", boss: true },
+  quarterly: { icon: "🐉", boss: true },
+  spring: { icon: "🌸", boss: true },
+  autumn: { icon: "🍂", boss: true },
+};
 
 const FREQUENCY_OPTIONS: { value: ChoreFrequency; label: string }[] = [
   { value: "daily", label: "Quotidienne" },
@@ -50,6 +66,8 @@ const sectionsOf = (chores: readonly Chore[]) => {
   return sections;
 };
 
+type Toast = { id: number; text: string };
+
 export const ChoresModule = () => {
   const [chores, setChores, choresLoaded] = useStoredState<Chore[]>(
     "vq.chores",
@@ -62,6 +80,18 @@ export const ChoresModule = () => {
   );
   const [name, setName] = useState("");
   const [frequency, setFrequency] = useState<ChoreFrequency>("daily");
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const [poppedId, setPoppedId] = useState<string | null>(null);
+  const toastCounter = useRef(0);
+
+  const xp = computeXp(history);
+  const { level, into, needed } = levelFromXp(xp);
+  const streak = activityStreak(chores);
+  const earned = earnedBadgeIds(history, level, streak);
+
+  const rate = dailyCompletionRate(chores);
+  const forgotten = leastCompletedDaily(chores);
+  const monthValidations = monthValidationCount(history);
 
   useEffect(() => {
     if (
@@ -73,9 +103,14 @@ export const ChoresModule = () => {
     }
   }, [choresLoaded, chores, setChores]);
 
-  const rate = dailyCompletionRate(chores);
-  const forgotten = leastCompletedDaily(chores);
-  const monthValidations = monthValidationCount(history);
+  const pushToast = (text: string) => {
+    toastCounter.current += 1;
+    const id = toastCounter.current;
+    setToasts((previous) => [...previous, { id, text }]);
+    window.setTimeout(() => {
+      setToasts((previous) => previous.filter((toast) => toast.id !== id));
+    }, 1400);
+  };
 
   const add = (event: FormEvent) => {
     event.preventDefault();
@@ -100,7 +135,14 @@ export const ChoresModule = () => {
           : entry
       )
     );
+
     if (!wasChecked) {
+      setPoppedId(chore.id);
+      window.setTimeout(() => setPoppedId(null), 300);
+
+      const gained = xpFor(chore.frequency);
+      const nextLevel = levelFromXp(computeXp(history) + gained).level;
+
       setHistory((previous) => [
         {
           id: newId(),
@@ -114,6 +156,11 @@ export const ChoresModule = () => {
           (entry) => !(entry.choreId === chore.id && entry.period === key)
         ),
       ]);
+
+      pushToast(`+${gained} XP`);
+      if (nextLevel > level) {
+        pushToast(`🎉 Niveau ${nextLevel} atteint !`);
+      }
     }
   };
 
@@ -122,7 +169,7 @@ export const ChoresModule = () => {
   };
 
   const clearHistory = () => {
-    if (window.confirm("Supprimer tout l'historique ?")) {
+    if (window.confirm("Supprimer tout l'historique ? L'XP repartira de zéro.")) {
       setHistory([]);
     }
   };
@@ -135,37 +182,98 @@ export const ChoresModule = () => {
     b.completedAt.localeCompare(a.completedAt)
   );
 
+  const dailyChores = chores.filter((chore) => chore.frequency === "daily");
+  const dailyDone = dailyChores.filter(
+    (chore) => chore.done[chorePeriodKey("daily")]
+  ).length;
+  const missionComplete = dailyChores.length > 0 && dailyDone === dailyChores.length;
+
   return (
     <section className="flex flex-col gap-4">
-      {rate !== null ? (
-        <div className="flex flex-col gap-1.5 rounded-2xl border border-line bg-surface p-4 text-sm">
-          <div className="flex justify-between">
-            <span className="text-muted">Routine quotidienne · 7 jours</span>
-            <span className="font-semibold">{rate} %</span>
-          </div>
-          <div className="h-2 overflow-hidden rounded-full bg-raised">
-            <div
-              className="h-full rounded-full bg-accent"
-              style={{ width: `${rate}%` }}
-            />
-          </div>
-          {forgotten !== null && forgotten.count < 28 ? (
-            <p className="text-xs text-muted">
-              Souvent oubliée : {forgotten.name} ({forgotten.count}/28 jours)
+      <div className="relative overflow-hidden rounded-2xl border-2 border-accent bg-gradient-to-br from-accent-soft to-raised p-4">
+        <div className="flex items-center gap-3">
+          <span className="animate-vq-bob text-3xl" aria-hidden>
+            🐱
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold">
+              Niveau {level} · {rankTitle(level)}
             </p>
-          ) : null}
-          <p className="text-xs text-muted">
-            Ce mois-ci : {monthValidations} validation
-            {monthValidations > 1 ? "s" : ""}
-          </p>
+            <p className="text-xs text-muted">
+              🔥 série de {streak} jour{streak > 1 ? "s" : ""} ·{" "}
+              {monthValidations} validation{monthValidations > 1 ? "s" : ""} ce
+              mois
+              {rate !== null ? ` · ⚡ précision 7 j : ${rate} %` : ""}
+            </p>
+          </div>
+          <div className="shrink-0 text-right">
+            <p className="text-lg font-bold text-accent-ink">{xp} XP</p>
+          </div>
         </div>
+        <div className="mt-3 h-3 overflow-hidden rounded-full bg-surface">
+          <div
+            className="animate-vq-shine h-full rounded-full bg-accent"
+            style={{ width: `${Math.round((into / needed) * 100)}%` }}
+          />
+        </div>
+        <p className="mt-1 text-right text-[10px] text-muted">
+          {into}/{needed} XP vers le niveau {level + 1}
+        </p>
+      </div>
+
+      <div
+        className={`rounded-2xl border p-4 ${
+          missionComplete
+            ? "border-accent bg-accent-soft"
+            : "border-dashed border-line bg-surface"
+        }`}
+      >
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-semibold">
+            {missionComplete ? "🎉 Mission accomplie !" : "⚡ Mission du jour"}
+          </p>
+          <span className="text-xs text-muted">
+            {dailyDone}/{dailyChores.length}
+          </span>
+        </div>
+        <div className="mt-2 h-2 overflow-hidden rounded-full bg-raised">
+          <div
+            className="h-full rounded-full bg-accent transition-all"
+            style={{
+              width: `${
+                dailyChores.length === 0
+                  ? 0
+                  : Math.round((dailyDone / dailyChores.length) * 100)
+              }%`,
+            }}
+          />
+        </div>
+        {missionComplete ? (
+          <p className="mt-2 text-xs text-accent-ink">
+            Votre chat est fier de vous. ✨ Revenez demain pour une nouvelle
+            quête !
+          </p>
+        ) : (
+          <p className="mt-2 text-xs text-muted">
+            {dailyChores.length - dailyDone} quête
+            {dailyChores.length - dailyDone > 1 ? "s" : ""} restante
+            {dailyChores.length - dailyDone > 1 ? "s" : ""} aujourd'hui
+          </p>
+        )}
+      </div>
+
+      {forgotten !== null && forgotten.count < 28 ? (
+        <p className="px-1 text-xs text-muted">
+          💡 Mission prioritaire : <strong>{forgotten.name}</strong> (
+          {forgotten.count}/28 jours)
+        </p>
       ) : null}
 
       <form onSubmit={add} className="grid grid-cols-2 gap-2">
         <input
           value={name}
           onChange={(event) => setName(event.target.value)}
-          placeholder="Nouvelle tâche ménagère…"
+          placeholder="Créer une quête…"
           className="col-span-2 rounded-xl border border-line bg-surface px-4 py-3 text-base outline-none placeholder:text-muted focus:border-accent"
         />
         <select
@@ -192,13 +300,19 @@ export const ChoresModule = () => {
         const doneCount = groupChores.filter(
           (chore) => chore.done[chorePeriodKey(group)]
         ).length;
+        const meta = GROUP_META[group];
         const sections = sectionsOf(groupChores);
 
         return (
           <div key={group} className="flex flex-col gap-2">
             <div className="flex items-baseline justify-between px-1">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">
-                {FREQUENCY_LABELS[group]}
+                {meta.icon} {FREQUENCY_LABELS[group]}
+                {meta.boss ? (
+                  <span className="ml-1.5 rounded bg-accent-soft px-1.5 py-0.5 text-[9px] font-bold text-accent-ink">
+                    BOSS
+                  </span>
+                ) : null}
               </h2>
               <span className="text-xs text-muted">
                 {doneCount}/{groupChores.length}
@@ -234,18 +348,26 @@ export const ChoresModule = () => {
                           key={chore.id}
                           onDelete={() => remove(chore.id)}
                         >
-                          <div className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3">
+                          <div
+                            className={`flex items-center gap-2.5 rounded-xl border bg-surface px-3.5 py-3 ${
+                              checked
+                                ? "border-accent bg-accent-soft"
+                                : meta.boss
+                                  ? "border-amber-400/60"
+                                  : "border-line"
+                            }`}
+                          >
                             <button
                               type="button"
                               aria-label={checked ? "Invalider" : "Valider"}
                               onClick={() => toggle(chore)}
-                              className={`flex size-6 shrink-0 items-center justify-center rounded-full border ${
+                              className={`flex size-7 shrink-0 items-center justify-center rounded-lg border-2 ${
                                 checked
                                   ? "border-accent bg-accent text-white"
-                                  : "border-line"
-                              }`}
+                                  : "border-line bg-canvas"
+                              } ${poppedId === chore.id ? "animate-vq-pop" : ""}`}
                             >
-                              {checked ? "✓" : ""}
+                              {checked ? "⚔" : ""}
                             </button>
                             <span
                               className={`min-w-0 flex-1 text-base ${
@@ -253,6 +375,9 @@ export const ChoresModule = () => {
                               }`}
                             >
                               {chore.name}
+                            </span>
+                            <span className="shrink-0 rounded-full bg-accent-soft px-1.5 py-0.5 text-[10px] font-semibold text-accent-ink">
+                              +{xpFor(chore.frequency)}
                             </span>
                             <button
                               type="button"
@@ -272,7 +397,7 @@ export const ChoresModule = () => {
             })}
             {groupChores.length === 0 ? (
               <p className="rounded-xl border border-dashed border-line px-4 py-3 text-center text-sm text-muted">
-                Aucune tâche {FREQUENCY_SINGULAR[group]}.
+                Aucune quête {FREQUENCY_SINGULAR[group]}.
               </p>
             ) : null}
           </div>
@@ -280,9 +405,40 @@ export const ChoresModule = () => {
       })}
 
       <div className="flex flex-col gap-2">
+        <h2 className="px-1 text-sm font-semibold uppercase tracking-wide text-muted">
+          🏅 Exploits
+        </h2>
+        <div className="grid grid-cols-4 gap-2">
+          {BADGES.map((badge) => {
+            const unlocked = earned.has(badge.id);
+            return (
+              <div
+                key={badge.id}
+                className={`flex flex-col items-center gap-1 rounded-xl border p-2 text-center ${
+                  unlocked
+                    ? "border-accent bg-accent-soft"
+                    : "border-line bg-surface opacity-50"
+                }`}
+              >
+                <span
+                  className={`text-xl ${unlocked ? "" : "grayscale"}`}
+                  aria-hidden
+                >
+                  {unlocked ? badge.icon : "🔒"}
+                </span>
+                <span className="text-[9px] leading-tight text-muted">
+                  {badge.label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between px-1">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">
-            Historique ({historyEntries.length})
+            Journal des quêtes ({historyEntries.length})
           </h2>
           {historyEntries.length > 0 ? (
             <button
@@ -308,9 +464,12 @@ export const ChoresModule = () => {
                     {formatDateTime(entry.completedAt)}
                   </p>
                 </div>
+                <span className="shrink-0 text-[10px] font-semibold text-accent-ink">
+                  +{xpFor(entry.frequency)}
+                </span>
                 <button
                   type="button"
-                  aria-label="Supprimer de l'historique"
+                  aria-label="Supprimer du journal"
                   onClick={() => removeEntry(entry.id)}
                   className="shrink-0 text-muted active:text-red-500"
                 >
@@ -322,9 +481,20 @@ export const ChoresModule = () => {
         </ul>
         {historyEntries.length === 0 ? (
           <p className="py-4 text-center text-sm text-muted">
-            Les tâches validées apparaîtront ici, sans limite de durée.
+            Vos quêtes accomplies s'afficheront ici.
           </p>
         ) : null}
+      </div>
+
+      <div className="pointer-events-none fixed inset-x-0 bottom-24 z-50 flex flex-col items-center gap-1">
+        {toasts.map((toast) => (
+          <span
+            key={toast.id}
+            className="animate-vq-float rounded-full bg-ink px-4 py-1.5 text-sm font-semibold text-canvas shadow-lg"
+          >
+            {toast.text}
+          </span>
+        ))}
       </div>
     </section>
   );

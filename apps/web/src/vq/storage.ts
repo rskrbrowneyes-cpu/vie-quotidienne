@@ -340,6 +340,135 @@ export const leastCompletedDaily = (
   return result;
 };
 
+export const XP_BY_FREQUENCY: Record<ChoreFrequency, number> = {
+  daily: 10,
+  weekly: 25,
+  monthly: 60,
+  quarterly: 120,
+  spring: 150,
+  autumn: 150,
+};
+
+export const xpFor = (frequency: ChoreFrequency): number =>
+  XP_BY_FREQUENCY[frequency];
+
+export const computeXp = (history: readonly ChoreHistoryEntry[]): number =>
+  history.reduce((total, entry) => total + XP_BY_FREQUENCY[entry.frequency], 0);
+
+export const levelFromXp = (
+  xp: number
+): { level: number; into: number; needed: number } => {
+  let level = 1;
+  let threshold = 0;
+
+  while (xp >= threshold + 100 * level) {
+    threshold += 100 * level;
+    level += 1;
+  }
+
+  return { level, into: xp - threshold, needed: 100 * level };
+};
+
+export const rankTitle = (level: number): string => {
+  if (level >= 12) {
+    return "Gardien légendaire du duplex";
+  }
+  if (level >= 9) {
+    return "Maître de la litière";
+  }
+  if (level >= 6) {
+    return "Champion du plumeau";
+  }
+  if (level >= 3) {
+    return "Agent confirmé du ménage";
+  }
+  return "Apprenti du ménage";
+};
+
+export const activityStreak = (
+  chores: readonly Chore[],
+  endDate = new Date()
+): number => {
+  const daily = chores.filter((chore) => chore.frequency === "daily");
+
+  if (daily.length === 0) {
+    return 0;
+  }
+
+  const dayActive = (offset: number): boolean => {
+    const key = dateKey(
+      new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate() - offset)
+    );
+    return daily.some((chore) => chore.done[key]);
+  };
+
+  let streak = 0;
+  let offset = 0;
+
+  if (!dayActive(0)) {
+    offset = 1;
+  }
+
+  while (dayActive(offset)) {
+    streak += 1;
+    offset += 1;
+  }
+
+  return streak;
+};
+
+export type BadgeDef = { id: string; icon: string; label: string };
+
+export const BADGES: BadgeDef[] = [
+  { id: "first", icon: "🥇", label: "Première quête" },
+  { id: "ten", icon: "🎯", label: "10 quêtes" },
+  { id: "fifty", icon: "🏆", label: "50 quêtes" },
+  { id: "litter", icon: "🐱", label: "Maître du bac" },
+  { id: "streak7", icon: "🔥", label: "Série de 7" },
+  { id: "level5", icon: "⭐", label: "Niveau 5" },
+  { id: "level10", icon: "👑", label: "Niveau 10" },
+  { id: "boss", icon: "👹", label: "Tueur de boss" },
+];
+
+export const earnedBadgeIds = (
+  history: readonly ChoreHistoryEntry[],
+  level: number,
+  streak: number
+): Set<string> => {
+  const earned = new Set<string>();
+
+  if (history.length >= 1) {
+    earned.add("first");
+  }
+  if (history.length >= 10) {
+    earned.add("ten");
+  }
+  if (history.length >= 50) {
+    earned.add("fifty");
+  }
+  if (history.filter((entry) => /litière/i.test(entry.choreName)).length >= 3) {
+    earned.add("litter");
+  }
+  if (streak >= 7) {
+    earned.add("streak7");
+  }
+  if (level >= 5) {
+    earned.add("level5");
+  }
+  if (level >= 10) {
+    earned.add("level10");
+  }
+  if (
+    history.some((entry) =>
+      ["monthly", "quarterly", "spring", "autumn"].includes(entry.frequency)
+    )
+  ) {
+    earned.add("boss");
+  }
+
+  return earned;
+};
+
 export const monthValidationCount = (
   history: readonly ChoreHistoryEntry[],
   date = new Date()
