@@ -118,7 +118,7 @@ const Paw = ({ className = "", style }: { className?: string; style?: CSSPropert
 );
 
 const Broom = () => (
-  <svg viewBox="0 0 18 44" className="animate-vq-sweeping h-24 w-10" aria-hidden>
+  <svg viewBox="0 0 18 44" className="h-24 w-10" aria-hidden>
     <defs>
       <linearGradient id="vq-broom-handle" x1="0" y1="0" x2="1" y2="0">
         <stop offset="0" stopColor="#E09A55" />
@@ -138,7 +138,7 @@ const Broom = () => (
 );
 
 const Duster = () => (
-  <svg viewBox="0 0 16 44" className="animate-vq-duster h-24 w-9" aria-hidden>
+  <svg viewBox="0 0 16 44" className="h-24 w-9" aria-hidden>
     <rect x="6.8" y="14" width="2.4" height="30" rx="1.2" fill="#C96F2B" />
     <path d="M8 3 C3.5 4 1.6 7.5 2.6 11.5 C5 9.2 6.6 8.4 8 7.8 Z" fill="#F6B39B" />
     <path d="M8 3 C12.5 4 14.4 7.5 13.4 11.5 C11 9.2 9.4 8.4 8 7.8 Z" fill="#F0954F" />
@@ -573,6 +573,17 @@ export function CatScene({
         : activity === "windows" || activity === "dust"
           ? "animate-vq-reach"
           : "animate-vq-carry";
+  const facing: "left" | "right" | "front" | "back" = !active
+    ? "front"
+    : activity === "dishes"
+      ? "left"
+      : activity === "litter"
+        ? "back"
+        : activity === "laundry" || activity === "garden" || activity === "vacuum"
+          ? "front"
+          : "right";
+  const toolSide = facing === "left" ? "left-1" : "right-1";
+  const toolSideOut = facing === "left" ? "-left-3" : "-right-3";
 
   return (
     <div
@@ -641,89 +652,91 @@ export function CatScene({
           className="absolute bottom-[-4px] left-7 h-3 w-24 rounded-[50%] bg-[#3E2C22]/25 blur-[3px]"
           aria-hidden
         />
-        <div key={`in-${activityKey}`} className="animate-vq-entrance relative">
+        <div className="relative">
           <div key={activityKey} className={catPose}>
-            <KottonCat
-              happy={complete || celebrating}
-              sleepy={sleeping}
-              excited={active || celebrating}
-              className="size-32 drop-shadow-md"
-            />
-            {activity === "sweep" ? (
-              <div className="absolute -right-4 bottom-0">
-                <div className="animate-vq-sway" style={{ animationDuration: "620ms" }}>
+            <div key={facing} className="animate-vq-turn">
+              <KottonCat
+                happy={complete || celebrating}
+                sleepy={sleeping}
+                excited={active || celebrating}
+                action={active ? activity : "none"}
+                facing={facing}
+                className="size-32 drop-shadow-md"
+              />
+              {activity === "sweep" ? (
+                <div className={`animate-vq-tool-sweep absolute bottom-0 ${toolSide}`}>
                   <Broom />
+                  {[-12, -4, 4, 12, 18].map((drift, index) => (
+                    <span
+                      key={drift}
+                      className="animate-vq-particle absolute bottom-1 rounded-full bg-[#C9B896]"
+                      style={
+                        {
+                          left: `${3 + index * 5}px`,
+                          width: 3,
+                          height: 3,
+                          animationDelay: `${index * 180}ms`,
+                          "--vq-drift": `${drift}px`,
+                        } as CSSProperties
+                      }
+                      aria-hidden
+                    />
+                  ))}
+                  <div className="absolute -bottom-1 left-2 flex items-end gap-0.5" aria-hidden>
+                    <span className="size-1.5 rounded-full bg-[#B8A688]" />
+                    <span className="size-1 rounded-full bg-[#C9B896]" />
+                    <span className="size-1.5 rounded-full bg-[#B8A688]" />
+                  </div>
                 </div>
-                {[-12, -4, 4, 12, 18].map((drift, index) => (
-                  <span
-                    key={drift}
-                    className="animate-vq-particle absolute bottom-1 rounded-full bg-[#C9B896]"
-                    style={
-                      {
-                        left: `${3 + index * 5}px`,
-                        width: 3,
-                        height: 3,
-                        animationDelay: `${index * 180}ms`,
-                        "--vq-drift": `${drift}px`,
-                      } as CSSProperties
-                    }
-                    aria-hidden
-                  />
-                ))}
-                <div className="absolute -bottom-1 left-2 flex items-end gap-0.5" aria-hidden>
-                  <span className="size-1.5 rounded-full bg-[#B8A688]" />
-                  <span className="size-1 rounded-full bg-[#C9B896]" />
-                  <span className="size-1.5 rounded-full bg-[#B8A688]" />
+              ) : null}
+              {activity === "dust" ? (
+                <div className={`animate-vq-tool-dust absolute -top-14 ${toolSideOut}`}>
+                  <Duster />
+                  {[0, 300, 600].map((delay, index) => (
+                    <Sparkle
+                      key={delay}
+                      color={index === 1 ? "#FFE9D6" : "#FFD9A8"}
+                      className="animate-vq-particle absolute h-2.5 w-2.5"
+                      style={{
+                        left: `${index * 8 - 2}px`,
+                        bottom: "2px",
+                        animationDelay: `${delay}ms`,
+                      }}
+                    />
+                  ))}
+                  {[0, 500].map((delay, index) => (
+                    <span
+                      key={delay}
+                      className="animate-vq-particle absolute bottom-4 size-2.5 rounded-full bg-[#D8CFBB] opacity-80 blur-[1px]"
+                      style={{ left: `${6 + index * 14}px`, animationDelay: `${delay}ms` }}
+                      aria-hidden
+                    />
+                  ))}
                 </div>
-              </div>
-            ) : null}
-            {activity === "dust" ? (
-              <div className="absolute -right-2 -top-12">
-                <Duster />
-                {[0, 300, 600].map((delay, index) => (
+              ) : null}
+              {activity === "dishes" ? (
+                <Paw className="animate-vq-scrub-paw absolute -top-5 left-7 h-5 w-6" />
+              ) : null}
+              {activity === "windows" ? (
+                <div className="absolute -top-16 right-6 flex items-end gap-1" aria-hidden>
+                  <div className="h-6 w-10 -skew-x-12 bg-white/50 blur-[2px] animate-vq-squeegee" />
+                  <Paw className="animate-vq-wipe h-5 w-6" />
+                </div>
+              ) : null}
+              {activity === "trash" ? (
+                <Bag className="animate-vq-drop-in absolute right-[42px] top-[44px] h-4 w-3.5" />
+              ) : null}
+              {activity === "tidy" ? (
+                <div className="absolute -right-11 bottom-0 h-9 w-10" aria-hidden>
+                  <Box className="animate-vq-push h-8 w-9" />
                   <Sparkle
-                    key={delay}
-                    color={index === 1 ? "#FFE9D6" : "#FFD9A8"}
-                    className="animate-vq-particle absolute h-2.5 w-2.5"
-                    style={{
-                      left: `${index * 8 - 2}px`,
-                      bottom: "2px",
-                      animationDelay: `${delay}ms`,
-                    }}
+                    color="#FFD97A"
+                    className="animate-vq-twinkle absolute -top-3 left-8 h-3.5 w-3.5"
+                    style={{ animationDelay: "900ms" }}
                   />
-                ))}
-                {[0, 500].map((delay, index) => (
-                  <span
-                    key={delay}
-                    className="animate-vq-particle absolute bottom-4 size-2.5 rounded-full bg-[#D8CFBB] opacity-80 blur-[1px]"
-                    style={{ left: `${6 + index * 14}px`, animationDelay: `${delay}ms` }}
-                    aria-hidden
-                  />
-                ))}
-              </div>
-            ) : null}
-            {activity === "dishes" ? (
-              <Paw className="animate-vq-scrub-paw absolute -top-4 left-8 h-4 w-5" />
-            ) : null}
-            {activity === "windows" ? (
-              <div className="absolute -top-14 right-2 flex items-end gap-1" aria-hidden>
-                <div className="h-6 w-10 -skew-x-12 bg-white/50 blur-[2px] animate-vq-squeegee" />
-                <Paw className="animate-vq-wipe h-4 w-5" />
-              </div>
-            ) : null}
-            {activity === "trash" ? (
-              <Bag className="animate-vq-drop-in absolute left-9 top-14 h-4 w-3.5" />
-            ) : null}
-            {activity === "tidy" ? (
-              <div className="absolute -right-9 bottom-0 h-9 w-10" aria-hidden>
-                <Box className="animate-vq-push h-8 w-9" />
-                <Sparkle
-                  color="#FFD97A"
-                  className="animate-vq-twinkle absolute -top-3 left-8 h-3.5 w-3.5"
-                  style={{ animationDelay: "900ms" }}
-                />
-              </div>
-            ) : null}
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
         {sleeping
@@ -739,7 +752,7 @@ export function CatScene({
           <div className="relative">
             <LitterBox />
             <Scoop className="animate-vq-dig absolute -top-5 right-1 h-7 w-5" />
-            <Paw className="animate-vq-scrub-paw absolute top-1 right-7 h-4 w-5" />
+            <Paw className="animate-vq-scrub-paw absolute top-2 right-8 h-5 w-6" />
             {[-14, 12, -6, 18, 4, -18].map((drift, index) => (
               <span
                 key={drift}
@@ -759,7 +772,7 @@ export function CatScene({
         {activity === "laundry" ? (
           <div className="relative">
             <Basket />
-            <Paw className="animate-vq-scrub-paw absolute top-0.5 left-3 h-4 w-5" />
+            <Paw className="animate-vq-scrub-paw absolute top-1 left-2 h-5 w-6" />
             <span
               className="animate-vq-tumble absolute -top-7 left-1 h-4 w-4 rounded-[40%] bg-[#FF8A33]"
               aria-hidden
