@@ -6,6 +6,7 @@ import type { Task } from "./storage";
 import { HouseBanner, RoomScene } from "./scene";
 import type { HouseEvent } from "./scene";
 import { SwipeToDelete } from "./swipe";
+import { SwipeZone } from "./swipe-nav";
 
 const timestamp = (): number => Date.now();
 
@@ -76,7 +77,9 @@ export const TasksModule = ({ houseEvent, onEvent }: TasksModuleProps) => {
   return (
     <section className="flex flex-col gap-4">
       <div className="sticky top-[calc(env(safe-area-inset-top)+68px)] z-30">
-        <RoomScene room="office" houseEvent={houseEvent} />
+        <SwipeZone>
+          <RoomScene room="office" houseEvent={houseEvent} />
+        </SwipeZone>
         <HouseBanner />
       </div>
 

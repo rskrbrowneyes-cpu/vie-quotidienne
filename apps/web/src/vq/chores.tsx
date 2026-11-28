@@ -24,6 +24,7 @@ import type { Chore, ChoreFrequency, ChoreHistoryEntry } from "./storage";
 import { CatScene, HouseBanner } from "./scene";
 import type { Activity, ParticleSpec, SceneParticle } from "./scene";
 import { SwipeToDelete } from "./swipe";
+import { SwipeZone } from "./swipe-nav";
 
 const FREQUENCIES: ChoreFrequency[] = [
   "daily",
@@ -321,14 +322,16 @@ export const ChoresModule = () => {
   return (
     <section className="flex flex-col gap-4">
       <div className="sticky top-[calc(env(safe-area-inset-top)+68px)] z-30">
-        <CatScene
-          progress={progress}
-          complete={missionComplete}
-          celebrating={celebrating}
-          activity={activity}
-          activityKey={activityKey}
-          particles={particles}
-        />
+        <SwipeZone>
+          <CatScene
+            progress={progress}
+            complete={missionComplete}
+            celebrating={celebrating}
+            activity={activity}
+            activityKey={activityKey}
+            particles={particles}
+          />
+        </SwipeZone>
         <HouseBanner>
           <p className="mt-1 flex items-center justify-between text-[10px] text-muted">
             <span>

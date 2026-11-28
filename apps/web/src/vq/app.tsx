@@ -16,17 +16,9 @@ import { HabitsModule } from "./habits";
 import { InstallButton } from "./install";
 import { KottonModule } from "./kotton";
 import { SettingsPanel } from "./settings";
+import { TABS } from "./tabs";
+import type { TabId } from "./tabs";
 import { TasksModule } from "./tasks";
-
-type TabId = "tasks" | "habits" | "chores" | "kotton" | "budget";
-
-const TABS: { id: TabId; label: string; icon: string }[] = [
-  { id: "tasks", label: "Tâches", icon: "✓" },
-  { id: "habits", label: "Habitudes", icon: "◎" },
-  { id: "chores", label: "Maison", icon: "⌂" },
-  { id: "kotton", label: "Kotton", icon: "🐾" },
-  { id: "budget", label: "Budget", icon: "€" },
-];
 
 export const App = () => {
   const [tab, setTab] = useStoredState<TabId>(STORAGE_KEYS.tab, "tasks");

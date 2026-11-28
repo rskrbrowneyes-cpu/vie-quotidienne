@@ -16,6 +16,7 @@ import {
 import type { Habit } from "./storage";
 import { HouseBanner, RoomScene } from "./scene";
 import type { HouseEvent } from "./scene";
+import { SwipeZone } from "./swipe-nav";
 
 const previousMonthCells = (
   checks: Record<string, boolean>
@@ -199,7 +200,9 @@ export const HabitsModule = ({ houseEvent, onEvent }: HabitsModuleProps) => {
   return (
     <section className="flex flex-col gap-4">
       <div className="sticky top-[calc(env(safe-area-inset-top)+68px)] z-30">
-        <RoomScene room="laundry" houseEvent={houseEvent} />
+        <SwipeZone>
+          <RoomScene room="laundry" houseEvent={houseEvent} />
+        </SwipeZone>
         <HouseBanner />
       </div>
 
