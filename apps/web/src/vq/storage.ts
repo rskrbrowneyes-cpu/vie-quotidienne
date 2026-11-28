@@ -35,6 +35,9 @@ export const STORAGE_KEYS = {
   kottonCaught: "vq.kotton.caught",
   kottonSound: "vq.kotton.sound",
   lastNotified: "vq.lastNotified",
+  agentWorker: "vq.agent.worker",
+  agentClientId: "vq.agent.gmailClientId",
+  agentFeeds: "vq.agent.feeds",
 } as const;
 
 /**

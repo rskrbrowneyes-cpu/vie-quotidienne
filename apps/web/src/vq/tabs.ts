@@ -1,4 +1,4 @@
-export type TabId = "tasks" | "habits" | "chores" | "kotton" | "budget";
+export type TabId = "tasks" | "habits" | "chores" | "kotton" | "budget" | "agent";
 
 export const TABS: { id: TabId; label: string; icon: string }[] = [
   { id: "tasks", label: "Tâches", icon: "✓" },
@@ -6,4 +6,5 @@ export const TABS: { id: TabId; label: string; icon: string }[] = [
   { id: "chores", label: "Maison", icon: "⌂" },
   { id: "kotton", label: "Kotton", icon: "🐾" },
   { id: "budget", label: "Budget", icon: "€" },
+  { id: "agent", label: "Agent", icon: "✦" },
 ];

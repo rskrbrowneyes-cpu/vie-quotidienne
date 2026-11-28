@@ -10,6 +10,7 @@ import {
 } from "./storage";
 import type { Chore, ReminderSettings, Task } from "./storage";
 import type { HouseEvent } from "./scene";
+import { AgentModule } from "./agent";
 import { BudgetModule } from "./budget";
 import { ChoresModule } from "./chores";
 import { HabitsModule } from "./habits";
@@ -155,6 +156,8 @@ export const App = () => {
             <ChoresModule />
           ) : tab === "kotton" ? (
             <KottonModule />
+          ) : tab === "agent" ? (
+            <AgentModule />
           ) : (
             <BudgetModule
               houseEvent={houseEvent}
@@ -165,7 +168,7 @@ export const App = () => {
       </main>
 
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-canvas/95 backdrop-blur">
-        <div className="mx-auto grid w-full max-w-md grid-cols-5 pb-[env(safe-area-inset-bottom)]">
+        <div className="mx-auto grid w-full max-w-md grid-cols-6 pb-[env(safe-area-inset-bottom)]">
           {TABS.map((entry) => (
             <button
               key={entry.id}
