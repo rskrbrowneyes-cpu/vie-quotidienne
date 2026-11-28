@@ -666,7 +666,6 @@ const fallbackValue = <T,>(entry: StoreEntry, seed?: () => T, initial?: T): T =>
 
 export const useStoredState = <T,>(key: string, initial: T, seed?: () => T) => {
   const fallback = useRef({ initial, seed });
-  fallback.current = { initial, seed };
 
   const subscribe = useCallback(
     (onStoreChange: () => void) => {

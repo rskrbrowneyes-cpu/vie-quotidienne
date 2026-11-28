@@ -1011,7 +1011,7 @@ export function CatScene({
       const target = TARGET_X[activity] + LIVING;
       walkTo(target, travelMs(xRef.current, target));
     }
-  }, [activity]);
+  }, [activity, walkTo, xRef]);
 
   useEffect(
     () => () => {
@@ -1030,7 +1030,7 @@ export function CatScene({
       window.clearTimeout(stop);
       setSpin(false);
     };
-  }, [celebrating]);
+  }, [celebrating, walkTo]);
 
   useEffect(() => {
     if (lastKey.current === activityKey) return;
@@ -1041,7 +1041,7 @@ export function CatScene({
       mouseTimer.current = undefined;
     }
     walkTo(TARGET_X[activity] + LIVING);
-  }, [activityKey, activity]);
+  }, [activityKey, activity, walkTo]);
 
   useEffect(() => {
     if (activity !== "idle") return;
@@ -1058,7 +1058,7 @@ export function CatScene({
       }
     }, 5000);
     return () => window.clearInterval(interval);
-  }, [activity, walkMs]);
+  }, [activity, walkMs, walkTo, xRef]);
 
   const acting = active && !moving;
   const dirt = complete ? 0 : 1 - progress;
@@ -1427,7 +1427,7 @@ export function RoomScene({ room, houseEvent }: RoomSceneProps) {
       }, ms + 60);
       return () => window.clearTimeout(arrival);
     }
-  }, [room, offset]);
+  }, [room, offset, walkTo, xRef]);
 
   useEffect(
     () => () => {
@@ -1463,7 +1463,7 @@ export function RoomScene({ room, houseEvent }: RoomSceneProps) {
       setFx(null);
       setCaption(null);
     }, ms + 2900);
-  }, [houseEvent, room]);
+  }, [houseEvent, room, walkTo, xRef]);
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -1471,7 +1471,7 @@ export function RoomScene({ room, houseEvent }: RoomSceneProps) {
       walkTo(pickSpot(ROOM_SPOTS[room], xRef.current));
     }, 6500);
     return () => window.clearInterval(interval);
-  }, [room, fx, caption]);
+  }, [room, fx, caption, walkTo, xRef]);
 
   const camLeft = Math.max(0, Math.min(CAM_MAX, catX - 80));
 

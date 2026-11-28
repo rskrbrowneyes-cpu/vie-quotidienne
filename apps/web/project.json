@@ -16,8 +16,8 @@
     "check": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "echo \"[check] web gate passed\"",
-        "cwd": "{workspaceRoot}"
+        "command": "bun run typecheck && bun run lint",
+        "cwd": "{projectRoot}"
       }
     }
   }

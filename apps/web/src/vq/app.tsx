@@ -30,7 +30,6 @@ const TABS: { id: TabId; label: string; icon: string }[] = [
 
 export const App = () => {
   const [tab, setTab] = useStoredState<TabId>(STORAGE_KEYS.tab, "tasks");
-  const [mounted, setMounted] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [eveningDismissed, setEveningDismissed] = useStoredState<string>(
     STORAGE_KEYS.eveningDismissed,
@@ -49,14 +48,13 @@ export const App = () => {
   });
 
   useEffect(() => {
-    setMounted(true);
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`);
     }
   }, []);
 
   useEffect(() => {
-    if (!mounted || !reminder.enabled) {
+    if (!reminder.enabled) {
       return;
     }
 
@@ -85,14 +83,14 @@ export const App = () => {
     check();
     const id = window.setInterval(check, 30_000);
     return () => window.clearInterval(id);
-  }, [mounted, reminder]);
+  }, [reminder]);
 
   const pendingTasks = tasks.filter((task) => !task.done).length;
   const pendingChores = chores.filter(
     (chore) => chore.frequency === "daily" && !chore.done[todayKey()]
   ).length;
   const pending = pendingTasks + pendingChores;
-  const isEvening = mounted && hour >= 20;
+  const isEvening = hour >= 20;
   const showEveningBanner =
     isEvening && pending > 0 && eveningDismissed !== todayKey();
 
@@ -108,9 +106,7 @@ export const App = () => {
               />
               Vie quotidienne
             </h1>
-            <p className="text-xs text-muted">
-              {mounted ? todayLabel() : "\u00a0"}
-            </p>
+            <p className="text-xs text-muted">{todayLabel()}</p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <button

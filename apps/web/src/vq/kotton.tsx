@@ -97,18 +97,6 @@ export function KottonModule() {
     timers.current = [];
   };
 
-  useEffect(
-    () => () => {
-      clearTimers();
-      heartTimers.current.forEach((t) => window.clearTimeout(t));
-      [purrTimer, idleTimer, sleepTimer, bellyTimer].forEach((timer) => {
-        if (timer.current !== undefined) window.clearTimeout(timer.current);
-      });
-      stopPurr();
-      void audioRef.current?.close().catch(() => undefined);
-    },
-    []
-  );
 
   const later = (fn: () => void, ms: number) => {
     timers.current.push(window.setTimeout(fn, ms));
@@ -124,7 +112,7 @@ export function KottonModule() {
     if (pos.room !== "play") {
       walkTo(1620, travelMs(xRef.current, 1620));
     }
-  }, []);
+  }, [walkTo, xRef]);
 
   const ensureAudio = () => {
     if (!soundOn) return null;
@@ -177,6 +165,19 @@ export function KottonModule() {
       return;
     }
   };
+
+  useEffect(
+    () => () => {
+      clearTimers();
+      heartTimers.current.forEach((t) => window.clearTimeout(t));
+      [purrTimer, idleTimer, sleepTimer, bellyTimer].forEach((timer) => {
+        if (timer.current !== undefined) window.clearTimeout(timer.current);
+      });
+      stopPurr();
+      void audioRef.current?.close().catch(() => undefined);
+    },
+    []
+  );
 
   const blip = (from: number, to: number, dur = 180, type: OscillatorType = "sine") => {
     const ctx = ensureAudio();
