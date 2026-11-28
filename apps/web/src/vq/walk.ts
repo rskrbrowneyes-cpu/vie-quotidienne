@@ -13,7 +13,7 @@ const HOUSE_WIDTH = 1800;
 const POS_KEY = STORAGE_KEYS.kottonPos;
 
 export const readKottonPos = (): KottonPos => {
-  const fallback: KottonPos = { x: 120, room: "living" };
+  const fallback: KottonPos = { x: 930, room: "living" };
   try {
     const raw = window.localStorage.getItem(POS_KEY);
     if (raw === null) return fallback;
@@ -44,10 +44,10 @@ export const travelMs = (from: number, to: number) =>
 
 export const ROOM_OFFSET: Record<HouseRoom, number> = {
   office: 0,
-  kitchen: 360,
-  laundry: 720,
-  living: 1080,
-  play: 1440,
+  laundry: 360,
+  living: 720,
+  play: 1080,
+  kitchen: 1440,
 };
 
 export const pickSpot = (spots: number[], avoid: number): number => {

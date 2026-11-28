@@ -30,7 +30,7 @@ export const STORAGE_KEYS = {
   reminder: "vq.reminder",
   eveningDismissed: "vq.eveningDismissed",
   houseEvent: "vq.house.event",
-  kottonPos: "vq.kotton.pos",
+  kottonPos: "vq.kotton.pos2",
   kottonCuddles: "vq.kotton.cuddles",
   kottonCaught: "vq.kotton.caught",
   kottonSound: "vq.kotton.sound",

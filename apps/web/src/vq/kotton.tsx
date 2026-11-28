@@ -12,7 +12,7 @@ import {
 import { pickSpot, useKottonWalk, WALK_MS } from "./walk";
 import { STORAGE_KEYS, useStoredState } from "./storage";
 
-const IDLE_SPOTS = [1500, 1536, 1572, 1608, 1644, 1680, 1712];
+const IDLE_SPOTS = [1140, 1176, 1212, 1248, 1284, 1320, 1352];
 
 const AFFECTION_TITLES = [
   "Chaton curieux",
@@ -110,7 +110,7 @@ export function KottonModule() {
   useEffect(() => {
     const pos = readKottonPos();
     if (pos.room !== "play") {
-      walkTo(1620, travelMs(xRef.current, 1620));
+      walkTo(1260, travelMs(xRef.current, 1260));
     }
   }, [walkTo, xRef]);
 
@@ -216,7 +216,7 @@ export function KottonModule() {
       later(() => setPouncing(false), 450);
     }
     idleTimer.current = window.setTimeout(() => {
-      walkTo(1640);
+      walkTo(1380);
       sleepTimer.current = window.setTimeout(() => setSleepy(true), WALK_MS + 120);
     }, 30000);
   };
@@ -317,7 +317,7 @@ export function KottonModule() {
   const throwYarn = () => {
     stopPlaying();
     resetIdle();
-    const first = 1480 + Math.random() * 280;
+    const first = 1120 + Math.random() * 280;
     setYarnX(first);
     blip(200, 400, 150, "triangle");
     const chaseStep = (target: number, round: number) => {
@@ -326,8 +326,8 @@ export function KottonModule() {
         setPouncing(true);
         navigator.vibrate?.(12);
         const next = Math.max(
-          1470,
-          Math.min(1770, target + (Math.random() < 0.5 ? -1 : 1) * (40 + Math.random() * 60))
+          1110,
+          Math.min(1410, target + (Math.random() < 0.5 ? -1 : 1) * (40 + Math.random() * 60))
         );
         setYarnX(next);
         blip(220, 420, 140, "triangle");
@@ -364,7 +364,7 @@ export function KottonModule() {
     if (point.y > 72) {
       stopPlaying();
       resetIdle();
-      walkTo(Math.max(1460, Math.min(1780, point.x + camLeft)));
+      walkTo(Math.max(1100, Math.min(1420, point.x + camLeft)));
     }
   };
 
@@ -393,7 +393,7 @@ export function KottonModule() {
       lastDrag.current = now;
       stopPlaying();
       resetIdle();
-      walkTo(Math.max(1460, Math.min(1780, point.x + camLeft)));
+      walkTo(Math.max(1100, Math.min(1420, point.x + camLeft)));
     }
   };
 

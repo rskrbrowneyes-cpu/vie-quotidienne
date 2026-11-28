@@ -83,11 +83,11 @@ const TARGET_X: Record<Activity, number> = {
   tidy: 100,
 };
 
-const LIVING = 1080;
+const LIVING = 720;
 
 const CAM_MAX = 1640;
 
-const IDLE_SPOTS = [1176, 1202, 1236, 1276, 1312, 1348];
+const IDLE_SPOTS = [816, 842, 876, 916, 952, 988];
 
 const MOUSE_SPOTS = IDLE_SPOTS;
 
@@ -930,14 +930,10 @@ export const HouseWorld = ({
         <OfficeDecorMemo taskFx={taskFx} night={night} />
       </g>
       <g transform="translate(360 0)">
-        <RoomShellMemo room="kitchen" active={activeRoom === "kitchen"} />
-        <KitchenDecorMemo budgetFx={budgetFx} budgetBig={budgetBig} />
-      </g>
-      <g transform="translate(720 0)">
         <RoomShellMemo room="laundry" active={activeRoom === "laundry"} />
         <LaundryDecorMemo habitFx={habitFx} />
       </g>
-      <g transform="translate(1080 0)">
+      <g transform="translate(720 0)">
         <RoomShellMemo room="living" active={activeRoom === "living"} />
         <LivingDecorMemo
           night={night}
@@ -952,9 +948,13 @@ export const HouseWorld = ({
           windowsFx={windowsFx}
         />
       </g>
-      <g transform="translate(1440 0)">
+      <g transform="translate(1080 0)">
         <RoomShellMemo room="play" active={activeRoom === "play"} />
         <PlayDecorMemo />
+      </g>
+      <g transform="translate(1440 0)">
+        <RoomShellMemo room="kitchen" active={activeRoom === "kitchen"} />
+        <KitchenDecorMemo budgetFx={budgetFx} budgetBig={budgetBig} />
       </g>
       {[360, 720, 1080, 1440].map((x) => (
         <DoorwayMemo key={x} x={x} />
@@ -1022,7 +1022,7 @@ export function CatScene({
 
   useEffect(() => {
     if (!celebrating) return;
-    walkTo(1240);
+    walkTo(880);
     const start = window.setTimeout(() => setSpin(true), 950);
     const stop = window.setTimeout(() => setSpin(false), 1750);
     return () => {
