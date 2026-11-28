@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
+import { useIsNight } from "./clock";
 import { Kotton } from "./cat";
 import type { CatAction, CatFacing } from "./cat";
 import {
@@ -1022,8 +1023,7 @@ export function CatScene({
   activityKey,
   particles,
 }: CatSceneProps) {
-  const hour = new Date().getHours();
-  const night = hour >= 20 || hour < 7;
+  const night = useIsNight();
   const active = activity !== "idle";
 
   const [catX, setCatX] = useState(() => readKottonPos().x);
@@ -1449,8 +1449,7 @@ type RoomSceneProps = {
 };
 
 export function RoomScene({ room, houseEvent }: RoomSceneProps) {
-  const hour = new Date().getHours();
-  const night = hour >= 20 || hour < 7;
+  const night = useIsNight();
   const offset = ROOM_OFFSET[room];
 
   const [catX, setCatX] = useState(() => {

@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import { useHour } from "./clock";
+import { ModuleBoundary } from "./error-boundary";
 import {
   STORAGE_KEYS,
   todayKey,
@@ -34,16 +36,17 @@ export const App = () => {
     STORAGE_KEYS.eveningDismissed,
     ""
   );
+  const hour = useHour();
   const [reminder] = useStoredState<ReminderSettings>(STORAGE_KEYS.reminder, {
     enabled: false,
     time: "20:00",
   });
   const [tasks] = useStoredState<Task[]>(STORAGE_KEYS.tasks, []);
   const [chores] = useStoredState<Chore[]>(STORAGE_KEYS.chores, []);
-  const [houseEvent, setHouseEvent] = useStoredState<HouseEvent>(
-    STORAGE_KEYS.houseEvent,
-    { kind: "none", ts: 0 }
-  );
+  const [houseEvent, setHouseEvent] = useState<HouseEvent>({
+    kind: "none",
+    ts: 0,
+  });
 
   useEffect(() => {
     setMounted(true);
@@ -89,7 +92,7 @@ export const App = () => {
     (chore) => chore.frequency === "daily" && !chore.done[todayKey()]
   ).length;
   const pending = pendingTasks + pendingChores;
-  const isEvening = mounted && new Date().getHours() >= 20;
+  const isEvening = mounted && hour >= 20;
   const showEveningBanner =
     isEvening && pending > 0 && eveningDismissed !== todayKey();
 
@@ -149,26 +152,28 @@ export const App = () => {
       ) : null}
 
       <main className="mx-auto w-full max-w-md flex-1 px-4 pb-28 pt-4">
-        {tab === "tasks" ? (
-          <TasksModule
-            houseEvent={houseEvent}
-            onEvent={(event) => setHouseEvent(event)}
-          />
-        ) : tab === "habits" ? (
-          <HabitsModule
-            houseEvent={houseEvent}
-            onEvent={(event) => setHouseEvent(event)}
-          />
-        ) : tab === "chores" ? (
-          <ChoresModule />
-        ) : tab === "kotton" ? (
-          <KottonModule />
-        ) : (
-          <BudgetModule
-            houseEvent={houseEvent}
-            onEvent={(event) => setHouseEvent(event)}
-          />
-        )}
+        <ModuleBoundary>
+          {tab === "tasks" ? (
+            <TasksModule
+              houseEvent={houseEvent}
+              onEvent={(event) => setHouseEvent(event)}
+            />
+          ) : tab === "habits" ? (
+            <HabitsModule
+              houseEvent={houseEvent}
+              onEvent={(event) => setHouseEvent(event)}
+            />
+          ) : tab === "chores" ? (
+            <ChoresModule />
+          ) : tab === "kotton" ? (
+            <KottonModule />
+          ) : (
+            <BudgetModule
+              houseEvent={houseEvent}
+              onEvent={(event) => setHouseEvent(event)}
+            />
+          )}
+        </ModuleBoundary>
       </main>
 
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-canvas/95 backdrop-blur">

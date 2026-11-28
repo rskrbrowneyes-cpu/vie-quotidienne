@@ -8,6 +8,7 @@ import {
   saveKottonPos,
   travelMs,
 } from "./scene";
+import { useIsNight } from "./clock";
 import { STORAGE_KEYS, useStoredState } from "./storage";
 
 const WALK_MS = 900;
@@ -21,11 +22,6 @@ const AFFECTION_TITLES = [
   "Caïd du salon",
   "Légende du duplex",
 ];
-
-const isNight = () => {
-  const hour = new Date().getHours();
-  return hour >= 20 || hour < 7;
-};
 
 const pickSpot = (avoid: number) => {
   const options = IDLE_SPOTS.filter((s) => s !== avoid);
@@ -116,7 +112,7 @@ export function KottonModule() {
   const timers = useRef<number[]>([]);
   const audioRef = useRef<AudioContext | null>(null);
   const purrNodes = useRef<{ osc: OscillatorNode; lfo: OscillatorNode; gain: GainNode } | null>(null);
-  const night = isNight();
+  const night = useIsNight();
 
   const xp = cuddles + caught * 5;
   const level = Math.floor(xp / 100) + 1;
