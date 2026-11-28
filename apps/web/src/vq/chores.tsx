@@ -17,12 +17,11 @@ import {
   levelFromXp,
   monthValidationCount,
   newId,
-  rankTitle,
   useStoredState,
   xpFor,
 } from "./storage";
 import type { Chore, ChoreFrequency, ChoreHistoryEntry } from "./storage";
-import { CatScene } from "./scene";
+import { CatScene, HouseBanner } from "./scene";
 import type { Activity, ParticleSpec, SceneParticle } from "./scene";
 import { SwipeToDelete } from "./swipe";
 
@@ -321,29 +320,17 @@ export const ChoresModule = () => {
           activityKey={activityKey}
           particles={particles}
         />
-        <div className="rounded-b-2xl border-2 border-t-0 border-accent bg-surface/95 px-4 py-3 backdrop-blur">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold">
-              Niveau {level} · {rankTitle(level)}
-            </p>
-            <p className="text-sm font-bold text-accent-ink">{xp} XP</p>
-          </div>
-          <div className="mt-2 h-3 overflow-hidden rounded-full bg-raised">
-            <div
-              className="animate-vq-shimmer h-full rounded-full"
-              style={{ width: `${Math.round((into / needed) * 100)}%` }}
-            />
-          </div>
+        <HouseBanner>
           <p className="mt-1 flex items-center justify-between text-[10px] text-muted">
             <span>
               🔥 {streak} j · 🗓️ {monthValidations} ce mois
               {rate !== null ? ` · ⚡ ${rate} %` : ""}
             </span>
             <span>
-              🧼 {Math.round(progress * 100)} % · {into}/{needed} XP
+              🧹 {Math.round(progress * 100)} % · {into}/{needed} XP
             </span>
           </p>
-        </div>
+        </HouseBanner>
       </div>
 
       <div

@@ -16,6 +16,8 @@ import {
   useStoredState,
 } from "./storage";
 import type { Expense } from "./storage";
+import { HouseBanner, RoomScene } from "./scene";
+import type { HouseEvent } from "./scene";
 import { SwipeToDelete } from "./swipe";
 
 const lastSixMonths = (): string[] =>
@@ -23,7 +25,12 @@ const lastSixMonths = (): string[] =>
     shiftMonth(currentMonthKey(), index - 5)
   );
 
-export const BudgetModule = () => {
+type BudgetModuleProps = {
+  houseEvent: HouseEvent;
+  onEvent: (event: HouseEvent) => void;
+};
+
+export const BudgetModule = ({ houseEvent, onEvent }: BudgetModuleProps) => {
   const [expenses, setExpenses] = useStoredState<Expense[]>("vq.expenses", []);
   const [month, setMonth] = useState(currentMonthKey);
   const [amount, setAmount] = useState("");
@@ -64,6 +71,7 @@ export const BudgetModule = () => {
     ]);
     setAmount("");
     setNote("");
+    onEvent({ kind: "budget", big: value >= 100, ts: Date.now() });
   };
 
   const duplicate = (expense: Expense) => {
@@ -83,6 +91,11 @@ export const BudgetModule = () => {
 
   return (
     <section className="flex flex-col gap-4">
+      <div className="sticky top-[calc(env(safe-area-inset-top)+68px)] z-30">
+        <RoomScene room="kitchen" houseEvent={houseEvent} />
+        <HouseBanner />
+      </div>
+
       <div className="flex items-center justify-between rounded-2xl border border-line bg-surface px-3 py-3">
         <button
           type="button"

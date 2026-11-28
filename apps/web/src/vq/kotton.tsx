@@ -2,12 +2,17 @@ import { useEffect, useRef, useState } from "react";
 
 import { Kotton, KottonBelly } from "./cat";
 import type { CatFacing } from "./cat";
-import { RoomDiorama } from "./scene";
+import {
+  HouseWorld,
+  readKottonPos,
+  saveKottonPos,
+  travelMs,
+} from "./scene";
 import { useStoredState } from "./storage";
 
 const WALK_MS = 900;
 
-const IDLE_SPOTS = [60, 96, 132, 168, 204, 240, 276, 312];
+const IDLE_SPOTS = [1500, 1536, 1572, 1608, 1644, 1680, 1712];
 
 const AFFECTION_TITLES = [
   "Chaton curieux",
@@ -82,7 +87,7 @@ const YarnBall = () => (
 );
 
 export function KottonModule() {
-  const [catX, setCatX] = useState(120);
+  const [catX, setCatX] = useState(() => readKottonPos().x);
   const [moving, setMoving] = useState(false);
   const [walkDir, setWalkDir] = useState<"left" | "right">("right");
   const [pouncing, setPouncing] = useState(false);
@@ -98,7 +103,7 @@ export function KottonModule() {
   const [caught, setCaught] = useStoredState<number>("vq.kotton.caught", 0);
   const [soundOn, setSoundOn] = useStoredState<boolean>("vq.kotton.sound", true);
 
-  const xRef = useRef(120);
+  const xRef = useRef(catX);
   const walkTimer = useRef<number | undefined>(undefined);
   const purrTimer = useRef<number | undefined>(undefined);
   const idleTimer = useRef<number | undefined>(undefined);
@@ -140,19 +145,33 @@ export function KottonModule() {
     timers.current.push(window.setTimeout(fn, ms));
   };
 
-  const walkTo = (target: number) => {
+  const [walkMs, setWalkMs] = useState(WALK_MS);
+
+  const walkTo = (target: number, ms = WALK_MS) => {
     const from = xRef.current;
-    if (from === target) return;
+    if (from === target) {
+      setWalkMs(ms);
+      return;
+    }
     if (walkTimer.current !== undefined) window.clearTimeout(walkTimer.current);
     xRef.current = target;
     setWalkDir(target < from ? "left" : "right");
     setMoving(true);
+    setWalkMs(ms);
     setCatX(target);
+    saveKottonPos({ x: target, room: "play" });
     walkTimer.current = window.setTimeout(() => {
       walkTimer.current = undefined;
       setMoving(false);
-    }, WALK_MS);
+    }, ms);
   };
+
+  useEffect(() => {
+    const pos = readKottonPos();
+    if (pos.room !== "play") {
+      walkTo(1620, travelMs(xRef.current, 1620));
+    }
+  }, []);
 
   const ensureAudio = () => {
     if (!soundOn) return null;
@@ -243,7 +262,7 @@ export function KottonModule() {
       later(() => setPouncing(false), 450);
     }
     idleTimer.current = window.setTimeout(() => {
-      walkTo(196);
+      walkTo(1640);
       sleepTimer.current = window.setTimeout(() => setSleepy(true), WALK_MS + 120);
     }, 30000);
   };
@@ -344,7 +363,7 @@ export function KottonModule() {
   const throwYarn = () => {
     stopPlaying();
     resetIdle();
-    const first = 40 + Math.random() * 290;
+    const first = 1480 + Math.random() * 280;
     setYarnX(first);
     blip(200, 400, 150, "triangle");
     const chaseStep = (target: number, round: number) => {
@@ -353,8 +372,8 @@ export function KottonModule() {
         setPouncing(true);
         navigator.vibrate?.(12);
         const next = Math.max(
-          30,
-          Math.min(340, target + (Math.random() < 0.5 ? -1 : 1) * (40 + Math.random() * 60))
+          1470,
+          Math.min(1770, target + (Math.random() < 0.5 ? -1 : 1) * (40 + Math.random() * 60))
         );
         setYarnX(next);
         blip(220, 420, 140, "triangle");
@@ -391,7 +410,7 @@ export function KottonModule() {
     if (point.y > 72) {
       stopPlaying();
       resetIdle();
-      walkTo(Math.max(20, Math.min(340, point.x + camLeft)));
+      walkTo(Math.max(1460, Math.min(1780, point.x + camLeft)));
     }
   };
 
@@ -420,7 +439,7 @@ export function KottonModule() {
       lastDrag.current = now;
       stopPlaying();
       resetIdle();
-      walkTo(Math.max(20, Math.min(340, point.x + camLeft)));
+      walkTo(Math.max(1460, Math.min(1780, point.x + camLeft)));
     }
   };
 
@@ -436,7 +455,7 @@ export function KottonModule() {
       : purring
         ? "animate-vq-crouch"
         : undefined;
-  const camLeft = Math.max(0, Math.min(200, catX - 80));
+  const camLeft = Math.max(0, Math.min(1640, catX - 80));
 
   const caption = belly
     ? "Kotton se roule sur le dos ! 🫶"
@@ -463,20 +482,13 @@ export function KottonModule() {
   return (
     <div className="space-y-4">
       <div className="relative h-[38vh] max-h-[420px] min-h-[300px] overflow-hidden rounded-2xl border-2 border-accent bg-[#EAD8B4]">
-        <RoomDiorama
+        <HouseWorld
           night={night}
-          complete={false}
-          dishesFx={false}
-          vacuumFx={false}
-          sweepFx={false}
-          litterFx={false}
-          laundryFx={false}
-          trashFx={false}
-          gardenFx={false}
-          windowsFx={false}
+          activeRoom="play"
           camLeft={camLeft}
           catX={catX}
           moving={moving}
+          walkMs={walkMs}
           extraFloor={
             yarnX !== null ? (
               <g
@@ -515,7 +527,7 @@ export function KottonModule() {
               </g>
             </g>
           </g>
-        </RoomDiorama>
+        </HouseWorld>
 
         <div
           className={`pointer-events-none absolute inset-0 transition-opacity duration-1000 ${

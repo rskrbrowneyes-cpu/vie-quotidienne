@@ -7,6 +7,7 @@ import {
   useStoredState,
 } from "./storage";
 import type { Chore, ReminderSettings, Task } from "./storage";
+import type { HouseEvent } from "./scene";
 import { BudgetModule } from "./budget";
 import { ChoresModule } from "./chores";
 import { HabitsModule } from "./habits";
@@ -39,6 +40,10 @@ export const App = () => {
   });
   const [tasks] = useStoredState<Task[]>(STORAGE_KEYS.tasks, []);
   const [chores] = useStoredState<Chore[]>(STORAGE_KEYS.chores, []);
+  const [houseEvent, setHouseEvent] = useStoredState<HouseEvent>(
+    "vq.house.event",
+    { kind: "none", ts: 0 }
+  );
 
   useEffect(() => {
     setMounted(true);
@@ -145,15 +150,24 @@ export const App = () => {
 
       <main className="mx-auto w-full max-w-md flex-1 px-4 pb-28 pt-4">
         {tab === "tasks" ? (
-          <TasksModule />
+          <TasksModule
+            houseEvent={houseEvent}
+            onEvent={(event) => setHouseEvent(event)}
+          />
         ) : tab === "habits" ? (
-          <HabitsModule />
+          <HabitsModule
+            houseEvent={houseEvent}
+            onEvent={(event) => setHouseEvent(event)}
+          />
         ) : tab === "chores" ? (
           <ChoresModule />
         ) : tab === "kotton" ? (
           <KottonModule />
         ) : (
-          <BudgetModule />
+          <BudgetModule
+            houseEvent={houseEvent}
+            onEvent={(event) => setHouseEvent(event)}
+          />
         )}
       </main>
 

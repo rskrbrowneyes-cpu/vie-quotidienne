@@ -13,6 +13,8 @@ import {
   weekdayInitial,
 } from "./storage";
 import type { Habit } from "./storage";
+import { HouseBanner, RoomScene } from "./scene";
+import type { HouseEvent } from "./scene";
 
 const previousMonthCells = (
   checks: Record<string, boolean>
@@ -142,7 +144,12 @@ const HabitCard = ({
   );
 };
 
-export const HabitsModule = () => {
+type HabitsModuleProps = {
+  houseEvent: HouseEvent;
+  onEvent: (event: HouseEvent) => void;
+};
+
+export const HabitsModule = ({ houseEvent, onEvent }: HabitsModuleProps) => {
   const [habits, setHabits] = useStoredState<Habit[]>("vq.habits", []);
   const [name, setName] = useState("");
   const days = useMemo(() => lastNDays(7), []);
@@ -167,16 +174,21 @@ export const HabitsModule = () => {
   };
 
   const toggle = (habitId: string, day: string) => {
+    const habit = habits.find((entry) => entry.id === habitId);
+    const wasChecked = habit?.checks[day] ?? false;
     setHabits((previous) =>
-      previous.map((habit) =>
-        habit.id === habitId
+      previous.map((entry) =>
+        entry.id === habitId
           ? {
-              ...habit,
-              checks: { ...habit.checks, [day]: !habit.checks[day] },
+              ...entry,
+              checks: { ...entry.checks, [day]: !entry.checks[day] },
             }
-          : habit
+          : entry
       )
     );
+    if (!wasChecked) {
+      onEvent({ kind: "habit", ts: Date.now() });
+    }
   };
 
   const remove = (habitId: string) => {
@@ -185,6 +197,11 @@ export const HabitsModule = () => {
 
   return (
     <section className="flex flex-col gap-4">
+      <div className="sticky top-[calc(env(safe-area-inset-top)+68px)] z-30">
+        <RoomScene room="laundry" houseEvent={houseEvent} />
+        <HouseBanner />
+      </div>
+
       <form onSubmit={add} className="flex gap-2">
         <input
           value={name}

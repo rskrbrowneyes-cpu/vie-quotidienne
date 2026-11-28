@@ -3,6 +3,8 @@ import type { FormEvent } from "react";
 
 import { newId, useStoredState } from "./storage";
 import type { Task } from "./storage";
+import { HouseBanner, RoomScene } from "./scene";
+import type { HouseEvent } from "./scene";
 import { SwipeToDelete } from "./swipe";
 
 type Filter = "active" | "all" | "done";
@@ -13,7 +15,12 @@ const FILTERS: { id: Filter; label: string }[] = [
   { id: "done", label: "Terminées" },
 ];
 
-export const TasksModule = () => {
+type TasksModuleProps = {
+  houseEvent: HouseEvent;
+  onEvent: (event: HouseEvent) => void;
+};
+
+export const TasksModule = ({ houseEvent, onEvent }: TasksModuleProps) => {
   const [tasks, setTasks] = useStoredState<Task[]>("vq.tasks", []);
   const [filter, setFilter] = useState<Filter>("active");
   const [text, setText] = useState("");
@@ -32,11 +39,15 @@ export const TasksModule = () => {
   };
 
   const toggle = (id: string) => {
+    const wasDone = tasks.find((task) => task.id === id)?.done ?? false;
     setTasks((previous) =>
       previous.map((task) =>
         task.id === id ? { ...task, done: !task.done } : task
       )
     );
+    if (!wasDone) {
+      onEvent({ kind: "task", ts: Date.now() });
+    }
   };
 
   const togglePin = (id: string) => {
@@ -62,6 +73,11 @@ export const TasksModule = () => {
 
   return (
     <section className="flex flex-col gap-4">
+      <div className="sticky top-[calc(env(safe-area-inset-top)+68px)] z-30">
+        <RoomScene room="office" houseEvent={houseEvent} />
+        <HouseBanner />
+      </div>
+
       <form onSubmit={add} className="flex gap-2">
         <input
           value={text}
