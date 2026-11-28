@@ -8,7 +8,7 @@ import {
   saveKottonPos,
   travelMs,
 } from "./scene";
-import { useStoredState } from "./storage";
+import { STORAGE_KEYS, useStoredState } from "./storage";
 
 const WALK_MS = 900;
 
@@ -99,9 +99,9 @@ export function KottonModule() {
   const [belly, setBelly] = useState(false);
   const [yarnX, setYarnX] = useState<number | null>(null);
   const [hearts, setHearts] = useState<{ id: number; left: number }[]>([]);
-  const [cuddles, setCuddles] = useStoredState<number>("vq.kotton.cuddles", 0);
-  const [caught, setCaught] = useStoredState<number>("vq.kotton.caught", 0);
-  const [soundOn, setSoundOn] = useStoredState<boolean>("vq.kotton.sound", true);
+  const [cuddles, setCuddles] = useStoredState<number>(STORAGE_KEYS.kottonCuddles, 0);
+  const [caught, setCaught] = useStoredState<number>(STORAGE_KEYS.kottonCaught, 0);
+  const [soundOn, setSoundOn] = useStoredState<boolean>(STORAGE_KEYS.kottonSound, true);
 
   const xRef = useRef(catX);
   const walkTimer = useRef<number | undefined>(undefined);

@@ -292,3 +292,78 @@ describe("formatAmount", () => {
     expect(formatAmount(12.5)).toContain("12,50");
   });
 });
+
+describe("useStoredState", () => {
+  const KEYS = ["vq.test.sync", "vq.test.corrupt", "vq.test.roundtrip"] as const;
+
+  const cleanUp = () => {
+    for (const key of KEYS) {
+      window.localStorage.removeItem(key);
+    }
+  };
+
+  it("shares one write across instances of the same key", async () => {
+    cleanUp();
+    const { renderHook, act } = await import("@testing-library/react");
+    const { useStoredState } = await import("./storage");
+
+    const first = renderHook(() => useStoredState<number>(KEYS[0], 0));
+    const second = renderHook(() => useStoredState<number>(KEYS[0], 0));
+
+    expect(first.result.current[0]).toBe(0);
+    expect(second.result.current[0]).toBe(0);
+
+    act(() => {
+      first.result.current[1](5);
+    });
+
+    expect(first.result.current[0]).toBe(5);
+    expect(second.result.current[0]).toBe(5);
+    expect(JSON.parse(window.localStorage.getItem(KEYS[0]) ?? "")).toBe(5);
+
+    first.unmount();
+    second.unmount();
+    cleanUp();
+  });
+
+  it("never overwrites a corrupted value", async () => {
+    cleanUp();
+    window.localStorage.setItem(KEYS[1], "{not json");
+    const { renderHook, act } = await import("@testing-library/react");
+    const { useStoredState } = await import("./storage");
+
+    const hook = renderHook(() => useStoredState<number[]>(KEYS[1], []));
+
+    expect(hook.result.current[0]).toEqual([]);
+    expect(hook.result.current[2]).toBe(false);
+
+    act(() => {
+      hook.result.current[1]([1]);
+    });
+
+    expect(hook.result.current[0]).toEqual([]);
+    expect(window.localStorage.getItem(KEYS[1])).toBe("{not json");
+
+    hook.unmount();
+    window.localStorage.removeItem(KEYS[1]);
+  });
+});
+
+describe("exportPayload and applyImport", () => {
+  it("round-trips a backup under the full storage keys", async () => {
+    const { exportPayload, applyImport, STORAGE_KEYS } = await import("./storage");
+    const backup = [
+      { id: "1", text: "Tester", done: false, createdAt: "2025-01-01T00:00:00.000Z" },
+    ];
+    window.localStorage.setItem(STORAGE_KEYS.tasks, JSON.stringify(backup));
+
+    const payload = JSON.parse(exportPayload()) as Record<string, unknown>;
+    expect(payload[STORAGE_KEYS.tasks]).toEqual(backup);
+
+    window.localStorage.removeItem(STORAGE_KEYS.tasks);
+    expect(applyImport(JSON.stringify(payload))).toBe(true);
+    expect(JSON.parse(window.localStorage.getItem(STORAGE_KEYS.tasks) ?? "null")).toEqual(backup);
+    expect(applyImport("{\"app\":\"other\"}")).toBe(false);
+    window.localStorage.removeItem(STORAGE_KEYS.tasks);
+  });
+});

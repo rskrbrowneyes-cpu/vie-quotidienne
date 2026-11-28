@@ -9,6 +9,7 @@ import {
   monthKeyOf,
   newId,
   shiftMonth,
+  STORAGE_KEYS,
   useStoredState,
   weekdayInitial,
 } from "./storage";
@@ -150,7 +151,7 @@ type HabitsModuleProps = {
 };
 
 export const HabitsModule = ({ houseEvent, onEvent }: HabitsModuleProps) => {
-  const [habits, setHabits] = useStoredState<Habit[]>("vq.habits", []);
+  const [habits, setHabits] = useStoredState<Habit[]>(STORAGE_KEYS.habits, []);
   const [name, setName] = useState("");
   const days = useMemo(() => lastNDays(7), []);
 

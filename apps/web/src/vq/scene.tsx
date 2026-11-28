@@ -90,7 +90,7 @@ const CAM_MAX = 1640;
 
 const WALK_MS = 900;
 
-const POS_KEY = "vq.kotton.pos";
+const POS_KEY = STORAGE_KEYS.kottonPos;
 
 export const readKottonPos = (): KottonPos => {
   const fallback: KottonPos = { x: 120, room: "living" };
