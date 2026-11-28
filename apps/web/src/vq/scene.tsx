@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { memo, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
 import { Kotton } from "./cat";
 import type { CatAction, CatFacing } from "./cat";
+import { useIsNight } from "./clock";
 import {
   STORAGE_KEYS,
   computeXp,
@@ -10,6 +11,18 @@ import {
   useStoredState,
 } from "./storage";
 import type { ChoreHistoryEntry } from "./storage";
+import {
+  ROOM_OFFSET,
+  WALK_MS,
+  pickSpot,
+  readKottonPos,
+  travelMs,
+  useKottonWalk,
+} from "./walk";
+import type { HouseRoom } from "./walk";
+
+export { ROOM_OFFSET, readKottonPos, saveKottonPos, travelMs } from "./walk";
+export type { HouseRoom, KottonPos } from "./walk";
 
 export type Activity =
   | "idle"
@@ -36,15 +49,11 @@ export type SceneParticle = {
   delay: number;
 };
 
-export type HouseRoom = "office" | "kitchen" | "laundry" | "living" | "play";
-
 export type HouseEvent = {
   kind: "none" | "task" | "habit" | "budget";
   ts: number;
   big?: boolean;
 };
-
-export type KottonPos = { x: number; room: HouseRoom };
 
 const ACTIVITY_CAPTIONS: Record<Activity, string> = {
   idle: "Kotton surveille la maison…",
@@ -76,58 +85,9 @@ const TARGET_X: Record<Activity, number> = {
 
 const LIVING = 1080;
 
-const ROOM_OFFSET: Record<HouseRoom, number> = {
-  office: 0,
-  kitchen: 360,
-  laundry: 720,
-  living: LIVING,
-  play: 1440,
-};
-
-const HOUSE_WIDTH = 1800;
-
 const CAM_MAX = 1640;
 
-const WALK_MS = 900;
-
-const POS_KEY = STORAGE_KEYS.kottonPos;
-
-export const readKottonPos = (): KottonPos => {
-  const fallback: KottonPos = { x: 120, room: "living" };
-  try {
-    const raw = window.localStorage.getItem(POS_KEY);
-    if (raw === null) return fallback;
-    const parsed = JSON.parse(raw) as KottonPos | null;
-    if (
-      parsed &&
-      typeof parsed.x === "number" &&
-      ROOM_OFFSET[parsed.room] !== undefined
-    ) {
-      return { x: Math.max(0, Math.min(HOUSE_WIDTH, parsed.x)), room: parsed.room };
-    }
-  } catch {
-    return fallback;
-  }
-  return fallback;
-};
-
-export const saveKottonPos = (pos: KottonPos) => {
-  try {
-    window.localStorage.setItem(POS_KEY, JSON.stringify(pos));
-  } catch {
-    return;
-  }
-};
-
-export const travelMs = (from: number, to: number) =>
-  Math.min(3000, 700 + Math.abs(to - from) * 1.6);
-
 const IDLE_SPOTS = [1176, 1202, 1236, 1276, 1312, 1348];
-
-const pickSpot = (spots: number[], avoid: number) => {
-  const options = spots.filter((s) => s !== avoid);
-  return options[Math.floor(Math.random() * options.length)] ?? avoid;
-};
 
 const MOUSE_SPOTS = IDLE_SPOTS;
 
@@ -215,7 +175,7 @@ const WindowBird = ({ night, windowsFx }: { night: boolean; windowsFx: boolean }
   );
 };
 
-const ToyMouse = ({ flip }: { flip: boolean }) => (
+export const ToyMouse = ({ flip }: { flip: boolean }) => (
   <g transform={flip ? "translate(-15 0) scale(-1 1)" : "translate(65 0)"} className="animate-vq-scurry">
     <path
       d="M6 46 Q0 44 -2.5 48.5"
@@ -853,6 +813,14 @@ const LivingDecor = ({
   </g>
 );
 
+const RoomShellMemo = memo(RoomShell);
+const DoorwayMemo = memo(Doorway);
+const OfficeDecorMemo = memo(OfficeDecor);
+const KitchenDecorMemo = memo(KitchenDecor);
+const LaundryDecorMemo = memo(LaundryDecor);
+const PlayDecorMemo = memo(PlayDecor);
+const LivingDecorMemo = memo(LivingDecor);
+
 type HouseWorldProps = {
   night: boolean;
   complete?: boolean;
@@ -958,20 +926,20 @@ export const HouseWorld = ({
       }}
     >
       <g transform="translate(0 0)">
-        <RoomShell room="office" active={activeRoom === "office"} />
-        <OfficeDecor taskFx={taskFx} night={night} />
+        <RoomShellMemo room="office" active={activeRoom === "office"} />
+        <OfficeDecorMemo taskFx={taskFx} night={night} />
       </g>
       <g transform="translate(360 0)">
-        <RoomShell room="kitchen" active={activeRoom === "kitchen"} />
-        <KitchenDecor budgetFx={budgetFx} budgetBig={budgetBig} />
+        <RoomShellMemo room="kitchen" active={activeRoom === "kitchen"} />
+        <KitchenDecorMemo budgetFx={budgetFx} budgetBig={budgetBig} />
       </g>
       <g transform="translate(720 0)">
-        <RoomShell room="laundry" active={activeRoom === "laundry"} />
-        <LaundryDecor habitFx={habitFx} />
+        <RoomShellMemo room="laundry" active={activeRoom === "laundry"} />
+        <LaundryDecorMemo habitFx={habitFx} />
       </g>
       <g transform="translate(1080 0)">
-        <RoomShell room="living" active={activeRoom === "living"} />
-        <LivingDecor
+        <RoomShellMemo room="living" active={activeRoom === "living"} />
+        <LivingDecorMemo
           night={night}
           complete={complete}
           dishesFx={dishesFx}
@@ -985,11 +953,11 @@ export const HouseWorld = ({
         />
       </g>
       <g transform="translate(1440 0)">
-        <RoomShell room="play" active={activeRoom === "play"} />
-        <PlayDecor />
+        <RoomShellMemo room="play" active={activeRoom === "play"} />
+        <PlayDecorMemo />
       </g>
       {[360, 720, 1080, 1440].map((x) => (
-        <Doorway key={x} x={x} />
+        <DoorwayMemo key={x} x={x} />
       ))}
       <g
         style={{
@@ -1022,40 +990,18 @@ export function CatScene({
   activityKey,
   particles,
 }: CatSceneProps) {
-  const hour = new Date().getHours();
-  const night = hour >= 20 || hour < 7;
+  const night = useIsNight();
   const active = activity !== "idle";
 
-  const [catX, setCatX] = useState(() => readKottonPos().x);
-  const [moving, setMoving] = useState(false);
-  const [walkDir, setWalkDir] = useState<"left" | "right">("right");
-  const [walkMs, setWalkMs] = useState(WALK_MS);
   const [mouse, setMouse] = useState(false);
   const [spin, setSpin] = useState(false);
   const lastKey = useRef(activityKey);
-  const xRef = useRef(catX);
-  const walkTimer = useRef<number | undefined>(undefined);
   const mouseTimer = useRef<number | undefined>(undefined);
   const traveled = useRef(false);
-
-  const walkTo = (target: number, ms = WALK_MS) => {
-    const from = xRef.current;
-    if (from === target) {
-      setWalkMs(ms);
-      return;
-    }
-    if (walkTimer.current !== undefined) window.clearTimeout(walkTimer.current);
-    xRef.current = target;
-    setWalkDir(target < from ? "left" : "right");
-    setMoving(true);
-    setWalkMs(ms);
-    setCatX(target);
-    saveKottonPos({ x: target, room: "living" });
-    walkTimer.current = window.setTimeout(() => {
-      walkTimer.current = undefined;
-      setMoving(false);
-    }, ms);
-  };
+  const { catX, moving, walkDir, walkMs, walkTo, xRef } = useKottonWalk({
+    room: "living",
+    getInitialX: () => readKottonPos().x,
+  });
 
   useEffect(() => {
     if (traveled.current) return;
@@ -1065,11 +1011,10 @@ export function CatScene({
       const target = TARGET_X[activity] + LIVING;
       walkTo(target, travelMs(xRef.current, target));
     }
-  }, [activity]);
+  }, [activity, walkTo, xRef]);
 
   useEffect(
     () => () => {
-      if (walkTimer.current !== undefined) window.clearTimeout(walkTimer.current);
       if (mouseTimer.current !== undefined) window.clearTimeout(mouseTimer.current);
     },
     []
@@ -1085,7 +1030,7 @@ export function CatScene({
       window.clearTimeout(stop);
       setSpin(false);
     };
-  }, [celebrating]);
+  }, [celebrating, walkTo]);
 
   useEffect(() => {
     if (lastKey.current === activityKey) return;
@@ -1096,7 +1041,7 @@ export function CatScene({
       mouseTimer.current = undefined;
     }
     walkTo(TARGET_X[activity] + LIVING);
-  }, [activityKey, activity]);
+  }, [activityKey, activity, walkTo]);
 
   useEffect(() => {
     if (activity !== "idle") return;
@@ -1113,7 +1058,7 @@ export function CatScene({
       }
     }, 5000);
     return () => window.clearInterval(interval);
-  }, [activity, walkMs]);
+  }, [activity, walkMs, walkTo, xRef]);
 
   const acting = active && !moving;
   const dirt = complete ? 0 : 1 - progress;
@@ -1449,44 +1394,22 @@ type RoomSceneProps = {
 };
 
 export function RoomScene({ room, houseEvent }: RoomSceneProps) {
-  const hour = new Date().getHours();
-  const night = hour >= 20 || hour < 7;
+  const night = useIsNight();
   const offset = ROOM_OFFSET[room];
 
-  const [catX, setCatX] = useState(() => {
-    const pos = readKottonPos();
-    return pos.room === room ? pos.x : offset + 210;
-  });
-  const [moving, setMoving] = useState(false);
-  const [walkDir, setWalkDir] = useState<"left" | "right">("right");
-  const [walkMs, setWalkMs] = useState(WALK_MS);
   const [fx, setFx] = useState<"task" | "habit" | "budget" | null>(null);
   const [caption, setCaption] = useState<string | null>(null);
-  const xRef = useRef(catX);
-  const walkTimer = useRef<number | undefined>(undefined);
   const fxTimer = useRef<number | undefined>(undefined);
   const fxEndTimer = useRef<number | undefined>(undefined);
   const traveled = useRef(false);
   const lastEvent = useRef<number | null>(null);
-
-  const walkTo = (target: number, ms = WALK_MS) => {
-    const from = xRef.current;
-    if (from === target) {
-      setWalkMs(ms);
-      return;
-    }
-    if (walkTimer.current !== undefined) window.clearTimeout(walkTimer.current);
-    xRef.current = target;
-    setWalkDir(target < from ? "left" : "right");
-    setMoving(true);
-    setWalkMs(ms);
-    setCatX(target);
-    saveKottonPos({ x: target, room });
-    walkTimer.current = window.setTimeout(() => {
-      walkTimer.current = undefined;
-      setMoving(false);
-    }, ms);
-  };
+  const { catX, moving, walkDir, walkMs, walkTo, xRef } = useKottonWalk({
+    room,
+    getInitialX: () => {
+      const pos = readKottonPos();
+      return pos.room === room ? pos.x : offset + 210;
+    },
+  });
 
   useEffect(() => {
     if (traveled.current) return;
@@ -1504,11 +1427,10 @@ export function RoomScene({ room, houseEvent }: RoomSceneProps) {
       }, ms + 60);
       return () => window.clearTimeout(arrival);
     }
-  }, [room, offset]);
+  }, [room, offset, walkTo, xRef]);
 
   useEffect(
     () => () => {
-      if (walkTimer.current !== undefined) window.clearTimeout(walkTimer.current);
       if (fxTimer.current !== undefined) window.clearTimeout(fxTimer.current);
       if (fxEndTimer.current !== undefined) window.clearTimeout(fxEndTimer.current);
     },
@@ -1541,7 +1463,7 @@ export function RoomScene({ room, houseEvent }: RoomSceneProps) {
       setFx(null);
       setCaption(null);
     }, ms + 2900);
-  }, [houseEvent, room]);
+  }, [houseEvent, room, walkTo, xRef]);
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -1549,7 +1471,7 @@ export function RoomScene({ room, houseEvent }: RoomSceneProps) {
       walkTo(pickSpot(ROOM_SPOTS[room], xRef.current));
     }, 6500);
     return () => window.clearInterval(interval);
-  }, [room, fx, caption]);
+  }, [room, fx, caption, walkTo, xRef]);
 
   const camLeft = Math.max(0, Math.min(CAM_MAX, catX - 80));
 

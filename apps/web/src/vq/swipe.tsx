@@ -9,8 +9,8 @@ export const SwipeToDelete = ({
   children: ReactNode;
 }) => {
   const [dx, setDx] = useState(0);
+  const [dragging, setDragging] = useState(false);
   const start = useRef<{ x: number; y: number } | null>(null);
-  const dragging = useRef(false);
 
   const handleStart = (event: TouchEvent) => {
     const touch = event.touches[0];
@@ -18,7 +18,7 @@ export const SwipeToDelete = ({
       return;
     }
     start.current = { x: touch.clientX, y: touch.clientY };
-    dragging.current = true;
+    setDragging(true);
   };
 
   const handleMove = (event: TouchEvent) => {
@@ -35,7 +35,7 @@ export const SwipeToDelete = ({
   };
 
   const handleEnd = () => {
-    dragging.current = false;
+    setDragging(false);
     start.current = null;
     if (dx <= -64) {
       setDx(0);
@@ -50,7 +50,7 @@ export const SwipeToDelete = ({
       className="touch-pan-y list-none"
       style={{
         transform: `translateX(${dx}px)`,
-        transition: dragging.current ? "none" : "transform 160ms ease",
+        transition: dragging ? "none" : "transform 160ms ease",
       }}
       onTouchStart={handleStart}
       onTouchMove={handleMove}

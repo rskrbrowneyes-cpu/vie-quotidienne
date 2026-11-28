@@ -2,15 +2,15 @@ import { useEffect, useRef, useState } from "react";
 
 import { Kotton, KottonBelly } from "./cat";
 import type { CatFacing } from "./cat";
+import { useIsNight } from "./clock";
 import {
   HouseWorld,
   readKottonPos,
-  saveKottonPos,
+  ToyMouse,
   travelMs,
 } from "./scene";
+import { pickSpot, useKottonWalk, WALK_MS } from "./walk";
 import { STORAGE_KEYS, useStoredState } from "./storage";
-
-const WALK_MS = 900;
 
 const IDLE_SPOTS = [1500, 1536, 1572, 1608, 1644, 1680, 1712];
 
@@ -21,32 +21,6 @@ const AFFECTION_TITLES = [
   "Caïd du salon",
   "Légende du duplex",
 ];
-
-const isNight = () => {
-  const hour = new Date().getHours();
-  return hour >= 20 || hour < 7;
-};
-
-const pickSpot = (avoid: number) => {
-  const options = IDLE_SPOTS.filter((s) => s !== avoid);
-  return options[Math.floor(Math.random() * options.length)] ?? avoid;
-};
-
-const ToyMouse = ({ flip }: { flip: boolean }) => (
-  <g transform={flip ? "translate(-15 0) scale(-1 1)" : "translate(65 0)"} className="animate-vq-scurry">
-    <path
-      d="M6 46 Q0 44 -2.5 48.5"
-      stroke="#B4AC9C"
-      strokeWidth="1.2"
-      fill="none"
-      strokeLinecap="round"
-    />
-    <ellipse cx="7" cy="46" rx="6" ry="3.8" fill="#9AA5B1" />
-    <circle cx="12.4" cy="44.6" r="2.6" fill="#B4BEC8" />
-    <circle cx="13.2" cy="44" r="0.55" fill="#3E2C22" />
-    <circle cx="9.4" cy="41.8" r="1.4" fill="#C9B8B0" />
-  </g>
-);
 
 const CarriedMouse = () => (
   <g>
@@ -87,9 +61,6 @@ const YarnBall = () => (
 );
 
 export function KottonModule() {
-  const [catX, setCatX] = useState(() => readKottonPos().x);
-  const [moving, setMoving] = useState(false);
-  const [walkDir, setWalkDir] = useState<"left" | "right">("right");
   const [pouncing, setPouncing] = useState(false);
   const [purring, setPurring] = useState(false);
   const [mouse, setMouse] = useState(false);
@@ -103,8 +74,6 @@ export function KottonModule() {
   const [caught, setCaught] = useStoredState<number>(STORAGE_KEYS.kottonCaught, 0);
   const [soundOn, setSoundOn] = useStoredState<boolean>(STORAGE_KEYS.kottonSound, true);
 
-  const xRef = useRef(catX);
-  const walkTimer = useRef<number | undefined>(undefined);
   const purrTimer = useRef<number | undefined>(undefined);
   const idleTimer = useRef<number | undefined>(undefined);
   const sleepTimer = useRef<number | undefined>(undefined);
@@ -116,7 +85,7 @@ export function KottonModule() {
   const timers = useRef<number[]>([]);
   const audioRef = useRef<AudioContext | null>(null);
   const purrNodes = useRef<{ osc: OscillatorNode; lfo: OscillatorNode; gain: GainNode } | null>(null);
-  const night = isNight();
+  const night = useIsNight();
 
   const xp = cuddles + caught * 5;
   const level = Math.floor(xp / 100) + 1;
@@ -128,50 +97,22 @@ export function KottonModule() {
     timers.current = [];
   };
 
-  useEffect(
-    () => () => {
-      clearTimers();
-      heartTimers.current.forEach((t) => window.clearTimeout(t));
-      [walkTimer, purrTimer, idleTimer, sleepTimer, bellyTimer].forEach((timer) => {
-        if (timer.current !== undefined) window.clearTimeout(timer.current);
-      });
-      stopPurr();
-      void audioRef.current?.close().catch(() => undefined);
-    },
-    []
-  );
 
   const later = (fn: () => void, ms: number) => {
     timers.current.push(window.setTimeout(fn, ms));
   };
 
-  const [walkMs, setWalkMs] = useState(WALK_MS);
-
-  const walkTo = (target: number, ms = WALK_MS) => {
-    const from = xRef.current;
-    if (from === target) {
-      setWalkMs(ms);
-      return;
-    }
-    if (walkTimer.current !== undefined) window.clearTimeout(walkTimer.current);
-    xRef.current = target;
-    setWalkDir(target < from ? "left" : "right");
-    setMoving(true);
-    setWalkMs(ms);
-    setCatX(target);
-    saveKottonPos({ x: target, room: "play" });
-    walkTimer.current = window.setTimeout(() => {
-      walkTimer.current = undefined;
-      setMoving(false);
-    }, ms);
-  };
+  const { catX, moving, walkDir, walkMs, walkTo, xRef } = useKottonWalk({
+    room: "play",
+    getInitialX: () => readKottonPos().x,
+  });
 
   useEffect(() => {
     const pos = readKottonPos();
     if (pos.room !== "play") {
       walkTo(1620, travelMs(xRef.current, 1620));
     }
-  }, []);
+  }, [walkTo, xRef]);
 
   const ensureAudio = () => {
     if (!soundOn) return null;
@@ -224,6 +165,19 @@ export function KottonModule() {
       return;
     }
   };
+
+  useEffect(
+    () => () => {
+      clearTimers();
+      heartTimers.current.forEach((t) => window.clearTimeout(t));
+      [purrTimer, idleTimer, sleepTimer, bellyTimer].forEach((timer) => {
+        if (timer.current !== undefined) window.clearTimeout(timer.current);
+      });
+      stopPurr();
+      void audioRef.current?.close().catch(() => undefined);
+    },
+    []
+  );
 
   const blip = (from: number, to: number, dur = 180, type: OscillatorType = "sine") => {
     const ctx = ensureAudio();
@@ -335,7 +289,7 @@ export function KottonModule() {
       later(() => {
         if (remaining > 0) {
           setDodging(true);
-          const next = pickSpot(target);
+          const next = pickSpot(IDLE_SPOTS, target);
           walkTo(next);
           later(() => {
             setDodging(false);
@@ -357,7 +311,7 @@ export function KottonModule() {
         later(() => setMouse(false), 1600);
       }, WALK_MS + 60);
     };
-    attempt(pickSpot(xRef.current), Math.random() < 0.5 ? 1 : 0);
+    attempt(pickSpot(IDLE_SPOTS, xRef.current), Math.random() < 0.5 ? 1 : 0);
   };
 
   const throwYarn = () => {

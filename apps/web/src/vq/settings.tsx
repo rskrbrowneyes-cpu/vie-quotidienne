@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import {
   STORAGE_KEYS,
@@ -26,17 +26,13 @@ export const SettingsPanel = ({ onClose }: { onClose: () => void }) => {
     () => new Date().toISOString()
   );
   const [reminder, setReminder] = useStoredState<ReminderSettings>(
-    "vq.reminder",
+    STORAGE_KEYS.reminder,
     { enabled: false, time: "20:00" }
   );
-  const [permission, setPermission] = useState<NotificationPermissionState>(
-    "default"
+  const [permission, setPermission] = useState<NotificationPermissionState>(() =>
+    notificationState()
   );
   const [importError, setImportError] = useState(false);
-
-  useEffect(() => {
-    setPermission(notificationState());
-  }, []);
 
   const download = () => {
     const blob = new Blob([exportPayload()], { type: "application/json" });

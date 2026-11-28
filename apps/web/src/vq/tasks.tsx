@@ -7,6 +7,8 @@ import { HouseBanner, RoomScene } from "./scene";
 import type { HouseEvent } from "./scene";
 import { SwipeToDelete } from "./swipe";
 
+const timestamp = (): number => Date.now();
+
 type Filter = "active" | "all" | "done";
 
 const FILTERS: { id: Filter; label: string }[] = [
@@ -46,7 +48,7 @@ export const TasksModule = ({ houseEvent, onEvent }: TasksModuleProps) => {
       )
     );
     if (!wasDone) {
-      onEvent({ kind: "task", ts: Date.now() });
+      onEvent({ kind: "task", ts: timestamp() });
     }
   };
 

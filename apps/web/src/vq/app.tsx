@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import { useHour } from "./clock";
+import { ModuleBoundary } from "./error-boundary";
 import {
   STORAGE_KEYS,
   todayKey,
@@ -28,32 +30,31 @@ const TABS: { id: TabId; label: string; icon: string }[] = [
 
 export const App = () => {
   const [tab, setTab] = useStoredState<TabId>(STORAGE_KEYS.tab, "tasks");
-  const [mounted, setMounted] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [eveningDismissed, setEveningDismissed] = useStoredState<string>(
     STORAGE_KEYS.eveningDismissed,
     ""
   );
+  const hour = useHour();
   const [reminder] = useStoredState<ReminderSettings>(STORAGE_KEYS.reminder, {
     enabled: false,
     time: "20:00",
   });
   const [tasks] = useStoredState<Task[]>(STORAGE_KEYS.tasks, []);
   const [chores] = useStoredState<Chore[]>(STORAGE_KEYS.chores, []);
-  const [houseEvent, setHouseEvent] = useStoredState<HouseEvent>(
-    STORAGE_KEYS.houseEvent,
-    { kind: "none", ts: 0 }
-  );
+  const [houseEvent, setHouseEvent] = useState<HouseEvent>({
+    kind: "none",
+    ts: 0,
+  });
 
   useEffect(() => {
-    setMounted(true);
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`);
     }
   }, []);
 
   useEffect(() => {
-    if (!mounted || !reminder.enabled) {
+    if (!reminder.enabled) {
       return;
     }
 
@@ -82,14 +83,14 @@ export const App = () => {
     check();
     const id = window.setInterval(check, 30_000);
     return () => window.clearInterval(id);
-  }, [mounted, reminder]);
+  }, [reminder]);
 
   const pendingTasks = tasks.filter((task) => !task.done).length;
   const pendingChores = chores.filter(
     (chore) => chore.frequency === "daily" && !chore.done[todayKey()]
   ).length;
   const pending = pendingTasks + pendingChores;
-  const isEvening = mounted && new Date().getHours() >= 20;
+  const isEvening = hour >= 20;
   const showEveningBanner =
     isEvening && pending > 0 && eveningDismissed !== todayKey();
 
@@ -105,9 +106,7 @@ export const App = () => {
               />
               Vie quotidienne
             </h1>
-            <p className="text-xs text-muted">
-              {mounted ? todayLabel() : "\u00a0"}
-            </p>
+            <p className="text-xs text-muted">{todayLabel()}</p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <button
@@ -149,26 +148,28 @@ export const App = () => {
       ) : null}
 
       <main className="mx-auto w-full max-w-md flex-1 px-4 pb-28 pt-4">
-        {tab === "tasks" ? (
-          <TasksModule
-            houseEvent={houseEvent}
-            onEvent={(event) => setHouseEvent(event)}
-          />
-        ) : tab === "habits" ? (
-          <HabitsModule
-            houseEvent={houseEvent}
-            onEvent={(event) => setHouseEvent(event)}
-          />
-        ) : tab === "chores" ? (
-          <ChoresModule />
-        ) : tab === "kotton" ? (
-          <KottonModule />
-        ) : (
-          <BudgetModule
-            houseEvent={houseEvent}
-            onEvent={(event) => setHouseEvent(event)}
-          />
-        )}
+        <ModuleBoundary>
+          {tab === "tasks" ? (
+            <TasksModule
+              houseEvent={houseEvent}
+              onEvent={(event) => setHouseEvent(event)}
+            />
+          ) : tab === "habits" ? (
+            <HabitsModule
+              houseEvent={houseEvent}
+              onEvent={(event) => setHouseEvent(event)}
+            />
+          ) : tab === "chores" ? (
+            <ChoresModule />
+          ) : tab === "kotton" ? (
+            <KottonModule />
+          ) : (
+            <BudgetModule
+              houseEvent={houseEvent}
+              onEvent={(event) => setHouseEvent(event)}
+            />
+          )}
+        </ModuleBoundary>
       </main>
 
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-canvas/95 backdrop-blur">
