@@ -1405,10 +1405,7 @@ export function RoomScene({ room, houseEvent }: RoomSceneProps) {
   const lastEvent = useRef<number | null>(null);
   const { catX, moving, walkDir, walkMs, walkTo, xRef } = useKottonWalk({
     room,
-    getInitialX: () => {
-      const pos = readKottonPos();
-      return pos.room === room ? pos.x : offset + 210;
-    },
+    getInitialX: () => readKottonPos().x,
   });
 
   useEffect(() => {
