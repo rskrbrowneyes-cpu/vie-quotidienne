@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 
-import { newId, useStoredState } from "./storage";
+import { newId, STORAGE_KEYS, useStoredState } from "./storage";
 import type { Task } from "./storage";
 import { HouseBanner, RoomScene } from "./scene";
 import type { HouseEvent } from "./scene";
@@ -21,7 +21,7 @@ type TasksModuleProps = {
 };
 
 export const TasksModule = ({ houseEvent, onEvent }: TasksModuleProps) => {
-  const [tasks, setTasks] = useStoredState<Task[]>("vq.tasks", []);
+  const [tasks, setTasks] = useStoredState<Task[]>(STORAGE_KEYS.tasks, []);
   const [filter, setFilter] = useState<Filter>("active");
   const [text, setText] = useState("");
 

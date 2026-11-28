@@ -27,21 +27,21 @@ const TABS: { id: TabId; label: string; icon: string }[] = [
 ];
 
 export const App = () => {
-  const [tab, setTab] = useStoredState<TabId>("vq.tab", "tasks");
+  const [tab, setTab] = useStoredState<TabId>(STORAGE_KEYS.tab, "tasks");
   const [mounted, setMounted] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [eveningDismissed, setEveningDismissed] = useStoredState<string>(
-    "vq.eveningDismissed",
+    STORAGE_KEYS.eveningDismissed,
     ""
   );
-  const [reminder] = useStoredState<ReminderSettings>("vq.reminder", {
+  const [reminder] = useStoredState<ReminderSettings>(STORAGE_KEYS.reminder, {
     enabled: false,
     time: "20:00",
   });
   const [tasks] = useStoredState<Task[]>(STORAGE_KEYS.tasks, []);
   const [chores] = useStoredState<Chore[]>(STORAGE_KEYS.chores, []);
   const [houseEvent, setHouseEvent] = useStoredState<HouseEvent>(
-    "vq.house.event",
+    STORAGE_KEYS.houseEvent,
     { kind: "none", ts: 0 }
   );
 
@@ -70,10 +70,10 @@ export const App = () => {
         return;
       }
       const today = todayKey();
-      if (window.localStorage.getItem("vq.lastNotified") === today) {
+      if (window.localStorage.getItem(STORAGE_KEYS.lastNotified) === today) {
         return;
       }
-      window.localStorage.setItem("vq.lastNotified", today);
+      window.localStorage.setItem(STORAGE_KEYS.lastNotified, today);
       new Notification("Vie quotidienne", {
         body: "C'est l'heure de votre routine du soir.",
       });

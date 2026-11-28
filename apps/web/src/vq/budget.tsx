@@ -10,6 +10,7 @@ import {
   monthShortLabel,
   newId,
   shiftMonth,
+  STORAGE_KEYS,
   sumExpenses,
   todayKey,
   totalsByCategory,
@@ -31,7 +32,7 @@ type BudgetModuleProps = {
 };
 
 export const BudgetModule = ({ houseEvent, onEvent }: BudgetModuleProps) => {
-  const [expenses, setExpenses] = useStoredState<Expense[]>("vq.expenses", []);
+  const [expenses, setExpenses] = useStoredState<Expense[]>(STORAGE_KEYS.expenses, []);
   const [month, setMonth] = useState(currentMonthKey);
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState<string>(CATEGORIES[0]);

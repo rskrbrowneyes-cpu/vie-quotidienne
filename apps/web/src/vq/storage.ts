@@ -1,4 +1,10 @@
-import { useEffect, useState } from "react";
+import {
+  useCallback,
+  useRef,
+  useSyncExternalStore,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 
 export type Task = {
   id: string;
@@ -20,7 +26,30 @@ export const STORAGE_KEYS = {
   choresHistory: "vq.choresHistory",
   expenses: "vq.expenses",
   firstOpened: "vq.firstOpened",
+  tab: "vq.tab",
+  reminder: "vq.reminder",
+  eveningDismissed: "vq.eveningDismissed",
+  houseEvent: "vq.house.event",
+  kottonPos: "vq.kotton.pos",
+  kottonCuddles: "vq.kotton.cuddles",
+  kottonCaught: "vq.kotton.caught",
+  kottonSound: "vq.kotton.sound",
+  lastNotified: "vq.lastNotified",
 } as const;
+
+/**
+ * The keys a backup carries. Settings and transient state (reminder time, tab,
+ * Kotton's position…) stay out: only the data the user builds over months moves
+ * through `exportPayload` / `applyImport`.
+ */
+const BACKUP_KEYS: readonly string[] = [
+  STORAGE_KEYS.tasks,
+  STORAGE_KEYS.habits,
+  STORAGE_KEYS.chores,
+  STORAGE_KEYS.choresHistory,
+  STORAGE_KEYS.expenses,
+  STORAGE_KEYS.firstOpened,
+];
 
 export type Habit = {
   id: string;
@@ -484,7 +513,7 @@ export const exportPayload = (): string => {
     exportedAt: new Date().toISOString(),
   };
 
-  for (const key of Object.values(STORAGE_KEYS)) {
+  for (const key of BACKUP_KEYS) {
     data[key] = JSON.parse(window.localStorage.getItem(key) ?? "null");
   }
 
@@ -499,18 +528,28 @@ export const applyImport = (raw: string): boolean => {
       return false;
     }
 
-    for (const [name, storageKey] of Object.entries(STORAGE_KEYS)) {
-      const value = data[name];
+    for (const key of BACKUP_KEYS) {
+      const value = data[key];
 
       if (value === undefined || value === null) {
         continue;
       }
 
-      if (name !== "firstOpened" && !Array.isArray(value)) {
+      if (key !== STORAGE_KEYS.firstOpened && !Array.isArray(value)) {
         return false;
       }
 
-      window.localStorage.setItem(storageKey, JSON.stringify(value));
+      window.localStorage.setItem(key, JSON.stringify(value));
+      const entry = store.get(key);
+      if (entry) {
+        entry.raw = JSON.stringify(value);
+        entry.value = value;
+        entry.corrupt = false;
+        entry.hydrated = true;
+        for (const listener of entry.listeners) {
+          listener();
+        }
+      }
     }
 
     return true;
@@ -577,37 +616,133 @@ export const newId = (): string =>
     ? crypto.randomUUID()
     : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
+type StoreEntry = {
+  raw: string | null;
+  value: unknown;
+  hydrated: boolean;
+  corrupt: boolean;
+  listeners: Set<() => void>;
+};
+
+const store = new Map<string, StoreEntry>();
+
+const entryFor = (key: string): StoreEntry => {
+  let entry = store.get(key);
+  if (entry === undefined) {
+    entry = {
+      raw: null,
+      value: undefined,
+      hydrated: false,
+      corrupt: false,
+      listeners: new Set(),
+    };
+    store.set(key, entry);
+  }
+  return entry;
+};
+
+const hydrate = (key: string): StoreEntry => {
+  const entry = entryFor(key);
+  if (entry.hydrated || typeof window === "undefined") {
+    return entry;
+  }
+  entry.hydrated = true;
+  try {
+    const raw = window.localStorage.getItem(key);
+    entry.raw = raw;
+    entry.value = raw === null ? undefined : JSON.parse(raw);
+  } catch {
+    entry.corrupt = true;
+  }
+  return entry;
+};
+
+const fallbackValue = <T,>(entry: StoreEntry, seed?: () => T, initial?: T): T => {
+  if (entry.value === undefined) {
+    entry.value = seed ? seed() : initial;
+  }
+  return entry.value as T;
+};
+
 export const useStoredState = <T,>(key: string, initial: T, seed?: () => T) => {
-  const [state, setState] = useState<T>(initial);
-  const [loaded, setLoaded] = useState(false);
+  const fallback = useRef({ initial, seed });
+  fallback.current = { initial, seed };
 
-  useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(key);
-      if (raw === null) {
-        if (seed) {
-          setState(seed());
+  const subscribe = useCallback(
+    (onStoreChange: () => void) => {
+      const entry = entryFor(key);
+      entry.listeners.add(onStoreChange);
+      const onStorage = (event: StorageEvent) => {
+        if (event.storageArea !== window.localStorage || event.key !== key) {
+          return;
         }
-      } else {
-        setState(JSON.parse(raw) as T);
-      }
-    } catch {
-      setLoaded(true);
-      return;
-    }
-    setLoaded(true);
-  }, [key, seed]);
+        try {
+          entry.raw = event.newValue;
+          entry.value = event.newValue === null ? undefined : JSON.parse(event.newValue);
+          entry.corrupt = false;
+        } catch {
+          entry.corrupt = true;
+        }
+        for (const listener of entry.listeners) {
+          listener();
+        }
+      };
+      window.addEventListener("storage", onStorage);
+      return () => {
+        entry.listeners.delete(onStoreChange);
+        window.removeEventListener("storage", onStorage);
+      };
+    },
+    [key]
+  );
 
-  useEffect(() => {
-    if (!loaded) {
-      return;
+  const getSnapshot = useCallback(() => {
+    const entry = hydrate(key);
+    return fallbackValue(entry, fallback.current.seed, fallback.current.initial);
+  }, [key]);
+
+  const state = useSyncExternalStore(subscribe, getSnapshot, () => initial);
+
+  const loaded = (() => {
+    if (typeof window === "undefined") {
+      return false;
     }
-    try {
-      window.localStorage.setItem(key, JSON.stringify(state));
-    } catch {
-      return;
-    }
-  }, [key, loaded, state]);
+    const entry = hydrate(key);
+    return entry.hydrated && !entry.corrupt;
+  })();
+
+  const setState = useCallback<Dispatch<SetStateAction<T>>>(
+    (action) => {
+      const entry = hydrate(key);
+      if (entry.corrupt) {
+        return;
+      }
+      const previous = fallbackValue(
+        entry,
+        fallback.current.seed,
+        fallback.current.initial
+      );
+      const next =
+        typeof action === "function"
+          ? (action as (value: T) => T)(previous)
+          : action;
+      const serialized = JSON.stringify(next);
+      if (serialized === entry.raw) {
+        return;
+      }
+      try {
+        window.localStorage.setItem(key, serialized);
+      } catch {
+        return;
+      }
+      entry.raw = serialized;
+      entry.value = next;
+      for (const listener of entry.listeners) {
+        listener();
+      }
+    },
+    [key]
+  );
 
   return [state, setState, loaded] as const;
 };
