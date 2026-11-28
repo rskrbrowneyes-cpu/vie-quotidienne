@@ -155,7 +155,9 @@ export const ChoresModule = () => {
   const [activity, setActivity] = useState<Activity>("idle");
   const [activityKey, setActivityKey] = useState(0);
   const [celebrating, setCelebrating] = useState(false);
+  const [burstKey, setBurstKey] = useState(0);
   const activityTimer = useRef<number | null>(null);
+  const burstTimer = useRef<number | null>(null);
 
   const xp = computeXp(history);
   const { level, into, needed } = levelFromXp(xp);
@@ -284,6 +286,13 @@ export const ChoresModule = () => {
       pushToast(`+${gained} XP`);
       if (nextLevel > level) {
         pushToast(`🎉 Niveau ${nextLevel} atteint !`);
+        navigator.vibrate?.([30, 40, 90]);
+        setBurstKey((key) => key + 1);
+        if (burstTimer.current !== null) window.clearTimeout(burstTimer.current);
+        burstTimer.current = window.setTimeout(() => {
+          burstTimer.current = null;
+          setBurstKey(0);
+        }, 950);
       }
     }
   };
@@ -340,6 +349,13 @@ export const ChoresModule = () => {
             : "border-dashed border-line bg-surface"
         }`}
       >
+        {burstKey ? (
+          <span
+            key={burstKey}
+            aria-hidden
+            className="animate-vq-burst pointer-events-none absolute bottom-[30%] left-1/2 size-40 rounded-full border-4 border-accent/60"
+          />
+        ) : null}
         <div className="flex items-center justify-between">
           <p className="text-sm font-semibold">
             {missionComplete ? "🎉 Mission accomplie !" : "⚡ Mission du jour"}

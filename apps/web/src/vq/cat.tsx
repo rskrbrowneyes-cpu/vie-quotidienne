@@ -13,6 +13,11 @@ export type CatAction =
   | "garden"
   | "tidy";
 
+const blinkStyle = {
+  animationDuration: `${(3.2 + Math.random() * 3.4).toFixed(2)}s`,
+  animationDelay: `-${(Math.random() * 4).toFixed(2)}s`,
+};
+
 export const ARM_CLASSES: Record<CatAction, string> = {
   none: "",
   sweep: "vq-arm-sweep",
@@ -140,6 +145,8 @@ type KottonProps = {
   excited?: boolean;
   action?: CatAction;
   facing?: CatFacing;
+  moving?: boolean;
+  arriving?: boolean;
 };
 
 export function Kotton({
@@ -148,12 +155,15 @@ export function Kotton({
   excited = false,
   action = "none",
   facing = "front",
+  moving = false,
+  arriving = false,
 }: KottonProps) {
   const armClass = ARM_CLASSES[action];
+  const stateClass = arriving ? "vq-cat-arrive" : moving ? "vq-cat-walk" : undefined;
 
   if (facing === "back") {
     return (
-      <g>
+      <g className={stateClass}>
         <FurDefs />
         <g className={happy ? undefined : `vq-cat-tail${excited ? " vq-cat-tail-fast" : ""}`}>
           <path
@@ -195,8 +205,8 @@ export function Kotton({
               <circle cx="38" cy="43" r="2.6" fill="#FFF4E8" />
             </g>
           ) : null}
-          <ellipse cx="24.5" cy="47.5" rx="4.4" ry="2.6" fill="#FFF4E8" />
-          <ellipse cx="39.5" cy="47.5" rx="4.4" ry="2.6" fill="#FFF4E8" />
+          <ellipse className="vq-cat-paw-a" cx="24.5" cy="47.5" rx="4.4" ry="2.6" fill="#FFF4E8" />
+          <ellipse className="vq-cat-paw-b" cx="39.5" cy="47.5" rx="4.4" ry="2.6" fill="#FFF4E8" />
           <g className="vq-cat-ear-l">
             <path
               d="M20.5 13 L23 2 L31 8.5 Z"
@@ -228,7 +238,7 @@ export function Kotton({
 
   if (facing === "front") {
     return (
-      <g>
+      <g className={stateClass}>
         <FurDefs />
         <g className={happy ? undefined : `vq-cat-tail${excited ? " vq-cat-tail-fast" : ""}`}>
           <path
@@ -267,8 +277,8 @@ export function Kotton({
               <circle cx="37.5" cy="43" r="2.6" fill="#FFF4E8" />
             </g>
           ) : null}
-          <ellipse cx="25.5" cy="47.5" rx="4.4" ry="2.6" fill="#FFF4E8" />
-          <ellipse cx="38.5" cy="47.5" rx="4.4" ry="2.6" fill="#FFF4E8" />
+          <ellipse className="vq-cat-paw-a" cx="25.5" cy="47.5" rx="4.4" ry="2.6" fill="#FFF4E8" />
+          <ellipse className="vq-cat-paw-b" cx="38.5" cy="47.5" rx="4.4" ry="2.6" fill="#FFF4E8" />
           <g className="vq-cat-ear-l">
             <path
               d="M20.5 13 L23 2 L31 8.5 Z"
@@ -306,7 +316,7 @@ export function Kotton({
               <path d="M35 19 H40" />
             </g>
           ) : (
-            <g className="vq-cat-eyes">
+            <g className="vq-cat-eyes" style={blinkStyle}>
               <circle cx="26.5" cy="18.5" r="2.4" fill="#3E2C22" />
               <circle cx="37.5" cy="18.5" r="2.4" fill="#3E2C22" />
               <circle cx="25.7" cy="17.7" r="0.8" fill="#FFF4E8" />
@@ -344,7 +354,7 @@ export function Kotton({
   }
 
   return (
-    <g>
+    <g className={stateClass}>
       <FurDefs />
       <g transform={facing === "right" ? "translate(64 0) scale(-1 1)" : undefined}>
         <g className={happy ? undefined : `vq-cat-tail${excited ? " vq-cat-tail-fast" : ""}`}>
@@ -377,8 +387,8 @@ export function Kotton({
             <path d="M36 29.5 Q40 31 44 30.4" />
           </g>
           <ellipse cx="28.5" cy="41.5" rx="9.5" ry="7" fill="#FFF4E8" />
-          <ellipse cx="16.5" cy="47.5" rx="4.6" ry="2.7" fill="#FFF4E8" />
-          <ellipse cx="40" cy="47.5" rx="4.6" ry="2.7" fill="#FFF4E8" />
+          <ellipse className="vq-cat-paw-a" cx="16.5" cy="47.5" rx="4.6" ry="2.7" fill="#FFF4E8" />
+          <ellipse className="vq-cat-paw-b" cx="40" cy="47.5" rx="4.6" ry="2.7" fill="#FFF4E8" />
           {armClass ? (
             <g className={`vq-cat-arm ${armClass}`}>
               <path
@@ -428,7 +438,7 @@ export function Kotton({
               <path d="M28.5 19 H33.5" />
             </g>
           ) : (
-            <g className="vq-cat-eyes">
+            <g className="vq-cat-eyes" style={blinkStyle}>
               <circle cx="19" cy="18.5" r="2.4" fill="#3E2C22" />
               <circle cx="31" cy="18.5" r="2.4" fill="#3E2C22" />
               <circle cx="18.2" cy="17.7" r="0.8" fill="#FFF4E8" />

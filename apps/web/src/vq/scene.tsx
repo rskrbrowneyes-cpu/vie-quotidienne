@@ -363,7 +363,7 @@ const KitchenDecor = ({ budgetFx, budgetBig }: { budgetFx: boolean; budgetBig: b
     <rect x="294" y="65" width="4" height="21" fill="#B08A5A" />
     <rect x="332" y="65" width="4" height="21" fill="#B08A5A" />
     <g
-      className={budgetBig ? "animate-vq-wobble" : undefined}
+      className={budgetFx ? "animate-vq-piggy" : budgetBig ? "animate-vq-wobble" : undefined}
       style={{ transformBox: "fill-box", transformOrigin: "50% 100%" }}
     >
       <ellipse cx="320" cy="57" rx="8" ry="7.4" fill="#F6B39B" />
@@ -925,15 +925,15 @@ export const HouseWorld = ({
         transition: `transform ${walkMs}ms ease-in-out`,
       }}
     >
-      <g transform="translate(0 0)">
+      <g transform="translate(0 0)" className={activeRoom === "office" ? undefined : "vq-room-off"}>
         <RoomShellMemo room="office" active={activeRoom === "office"} />
         <OfficeDecorMemo taskFx={taskFx} night={night} />
       </g>
-      <g transform="translate(360 0)">
+      <g transform="translate(360 0)" className={activeRoom === "laundry" ? undefined : "vq-room-off"}>
         <RoomShellMemo room="laundry" active={activeRoom === "laundry"} />
         <LaundryDecorMemo habitFx={habitFx} />
       </g>
-      <g transform="translate(720 0)">
+      <g transform="translate(720 0)" className={activeRoom === "living" ? undefined : "vq-room-off"}>
         <RoomShellMemo room="living" active={activeRoom === "living"} />
         <LivingDecorMemo
           night={night}
@@ -948,11 +948,11 @@ export const HouseWorld = ({
           windowsFx={windowsFx}
         />
       </g>
-      <g transform="translate(1080 0)">
+      <g transform="translate(1080 0)" className={activeRoom === "play" ? undefined : "vq-room-off"}>
         <RoomShellMemo room="play" active={activeRoom === "play"} />
         <PlayDecorMemo />
       </g>
-      <g transform="translate(1440 0)">
+      <g transform="translate(1440 0)" className={activeRoom === "kitchen" ? undefined : "vq-room-off"}>
         <RoomShellMemo room="kitchen" active={activeRoom === "kitchen"} />
         <KitchenDecorMemo budgetFx={budgetFx} budgetBig={budgetBig} />
       </g>
@@ -998,7 +998,7 @@ export function CatScene({
   const lastKey = useRef(activityKey);
   const mouseTimer = useRef<number | undefined>(undefined);
   const traveled = useRef(false);
-  const { catX, moving, walkDir, walkMs, walkTo, xRef } = useKottonWalk({
+  const { catX, moving, walkDir, walkMs, walkTo, xRef, arrived } = useKottonWalk({
     room: "living",
     getInitialX: () => readKottonPos().x,
   });
@@ -1131,6 +1131,8 @@ export function CatScene({
                 excited={acting || celebrating || mouse}
                 action={catAction}
                 facing={facing}
+                moving={moving && !celebrating}
+                arriving={arrived}
               />
               {acting && activity === "sweep" ? (
                 <g className="animate-vq-tool-sweep">
@@ -1403,7 +1405,7 @@ export function RoomScene({ room, houseEvent }: RoomSceneProps) {
   const fxEndTimer = useRef<number | undefined>(undefined);
   const traveled = useRef(false);
   const lastEvent = useRef<number | null>(null);
-  const { catX, moving, walkDir, walkMs, walkTo, xRef } = useKottonWalk({
+  const { catX, moving, walkDir, walkMs, walkTo, xRef, arrived } = useKottonWalk({
     room,
     getInitialX: () => readKottonPos().x,
   });
@@ -1505,6 +1507,8 @@ export function RoomScene({ room, houseEvent }: RoomSceneProps) {
                 excited={Boolean(fx) || moving}
                 action={fx === "budget" ? "trash" : fx ? "dust" : "none"}
                 facing={facing}
+                moving={moving}
+                arriving={arrived}
               />
             </g>
           </g>
@@ -1548,7 +1552,7 @@ export function RoomScene({ room, houseEvent }: RoomSceneProps) {
       </div>
 
       {caption ? (
-        <div className="pointer-events-none absolute inset-x-6 top-3 flex justify-center">
+        <div className="animate-vq-caption-in pointer-events-none absolute inset-x-6 top-3 flex justify-center">
           <span className="animate-vq-float rounded-full bg-[#221D17]/90 px-3 py-1 text-center text-[11px] font-semibold text-[#FFF9F2] shadow-md">
             {caption}
           </span>

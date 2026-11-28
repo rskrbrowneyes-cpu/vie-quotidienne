@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 
 import { Kotton, KottonBelly } from "./cat";
 import type { CatFacing } from "./cat";
@@ -13,6 +14,24 @@ import { pickSpot, useKottonWalk, WALK_MS } from "./walk";
 import { STORAGE_KEYS, useStoredState } from "./storage";
 
 const IDLE_SPOTS = [1140, 1176, 1212, 1248, 1284, 1320, 1352];
+
+type Heart = {
+  id: number;
+  left: number;
+  drift: number;
+  rot: number;
+  scale: number;
+  dur: number;
+};
+
+const spawnHeart = (left: number): Heart => ({
+  id: Date.now() + Math.random(),
+  left,
+  drift: Math.round(Math.random() * 28 - 14),
+  rot: Math.round(Math.random() * 26 - 13),
+  scale: Number((0.8 + Math.random() * 0.55).toFixed(2)),
+  dur: Number((1.25 + Math.random() * 0.5).toFixed(2)),
+});
 
 const AFFECTION_TITLES = [
   "Chaton curieux",
@@ -69,7 +88,7 @@ export function KottonModule() {
   const [sleepy, setSleepy] = useState(false);
   const [belly, setBelly] = useState(false);
   const [yarnX, setYarnX] = useState<number | null>(null);
-  const [hearts, setHearts] = useState<{ id: number; left: number }[]>([]);
+  const [hearts, setHearts] = useState<Heart[]>([]);
   const [cuddles, setCuddles] = useStoredState<number>(STORAGE_KEYS.kottonCuddles, 0);
   const [caught, setCaught] = useStoredState<number>(STORAGE_KEYS.kottonCaught, 0);
   const [soundOn, setSoundOn] = useStoredState<boolean>(STORAGE_KEYS.kottonSound, true);
@@ -102,7 +121,7 @@ export function KottonModule() {
     timers.current.push(window.setTimeout(fn, ms));
   };
 
-  const { catX, moving, walkDir, walkMs, walkTo, xRef } = useKottonWalk({
+  const { catX, moving, walkDir, walkMs, walkTo, xRef, arrived } = useKottonWalk({
     room: "play",
     getInitialX: () => readKottonPos().x,
   });
@@ -248,18 +267,15 @@ export function KottonModule() {
       setBelly(false);
       stopPurr();
     }, 2000);
-    const batch = [0, 1, 2, 3, 4, 5].map((i) => ({
-      id: Date.now() + i,
-      left: 28 + Math.random() * 44,
-    }));
-    setHearts((h) => [...h, ...batch]);
+    const batch = [0, 1, 2].map(() => spawnHeart(28 + Math.random() * 44));
+    setHearts((h) => [...h, ...batch].slice(-4));
     batch.forEach((b) => dropHeartLater(b.id, 2200));
   };
 
   const addHeart = () => {
-    const id = Date.now() + Math.random();
-    setHearts((h) => (h.length >= 4 ? h : [...h, { id, left: 34 + Math.random() * 32 }]));
-    dropHeartLater(id, 1700);
+    const heart = spawnHeart(34 + Math.random() * 32);
+    setHearts((h) => (h.length >= 4 ? h : [...h, heart]));
+    dropHeartLater(heart.id, 1700);
     const now = Date.now();
     heartTimes.current = [...heartTimes.current.filter((t) => now - t < 4000), now];
     if (heartTimes.current.length >= 5) {
@@ -468,6 +484,8 @@ export function KottonModule() {
                       sleepy={sleepy}
                       excited={moving || pouncing || yarnX !== null || mouse}
                       facing={facing}
+                      moving={moving}
+                      arriving={arrived}
                     />
                     {sleepy ? <Zzz /> : null}
                     {carrying ? (
@@ -545,7 +563,13 @@ export function KottonModule() {
             key={heart.id}
             aria-hidden
             className="animate-vq-heart pointer-events-none absolute bottom-[42%] text-lg"
-            style={{ left: `${heart.left}%` }}
+            style={{
+              left: `${heart.left}%`,
+              animationDuration: `${heart.dur}s`,
+              "--vq-drift": `${heart.drift}px`,
+              "--vq-rot": `${heart.rot}deg`,
+              "--vq-scale": `${heart.scale}`,
+            } as CSSProperties}
           >
             🧡
           </span>

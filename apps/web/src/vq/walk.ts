@@ -65,8 +65,10 @@ export const useKottonWalk = ({ room, getInitialX }: WalkOptions) => {
   const [moving, setMoving] = useState(false);
   const [walkDir, setWalkDir] = useState<"left" | "right">("right");
   const [walkMs, setWalkMs] = useState(WALK_MS);
+  const [arrived, setArrived] = useState(false);
   const xRef = useRef(catX);
   const walkTimer = useRef<number | undefined>(undefined);
+  const arriveTimer = useRef<number | undefined>(undefined);
 
   const walkTo = useCallback(
     (target: number, ms = WALK_MS) => {
@@ -76,15 +78,23 @@ export const useKottonWalk = ({ room, getInitialX }: WalkOptions) => {
         return;
       }
       if (walkTimer.current !== undefined) window.clearTimeout(walkTimer.current);
+      if (arriveTimer.current !== undefined) window.clearTimeout(arriveTimer.current);
       xRef.current = target;
       setWalkDir(target < from ? "left" : "right");
       setMoving(true);
       setWalkMs(ms);
       setCatX(target);
+      setArrived(false);
       saveKottonPos({ x: target, room });
       walkTimer.current = window.setTimeout(() => {
         walkTimer.current = undefined;
         setMoving(false);
+        if (Math.abs(target - from) < 240) return;
+        setArrived(true);
+        arriveTimer.current = window.setTimeout(() => {
+          arriveTimer.current = undefined;
+          setArrived(false);
+        }, 680);
       }, ms);
     },
     [room]
@@ -93,9 +103,10 @@ export const useKottonWalk = ({ room, getInitialX }: WalkOptions) => {
   useEffect(
     () => () => {
       if (walkTimer.current !== undefined) window.clearTimeout(walkTimer.current);
+      if (arriveTimer.current !== undefined) window.clearTimeout(arriveTimer.current);
     },
     []
   );
 
-  return { catX, moving, walkDir, walkMs, walkTo, xRef } as const;
+  return { catX, moving, walkDir, walkMs, walkTo, xRef, arrived } as const;
 };
